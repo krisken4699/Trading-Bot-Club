@@ -3,3 +3,5 @@
 __pycache__/
 *.py[cod]
 *$py.class
+**/symbols_list
+symbols_list
