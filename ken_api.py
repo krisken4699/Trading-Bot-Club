@@ -18,7 +18,7 @@ with open(dir_path + '/alpaca_credentials.json') as credentials:
     APCA_API_SECRET_KEY = data["APCA-API-SECRET-KEY"]
 
 
-def __APCA_request(path, headers={
+def __APCA_get(path, headers={
     'APCA-API-KEY-ID': APCA_API_KEY_ID,
     'APCA-API-SECRET-KEY': APCA_API_SECRET_KEY,
 }):
@@ -34,7 +34,7 @@ def download_symbols(path: str = "./") -> dict | int:
     downloads a all symbols to ./symbols_list in the same directory, symbols_list.\n
     \t:param str path: Path to the download, default directory is module directory.
     """
-    res = __APCA_request(API_DOMAIN + '/v2/assets')
+    res = __APCA_get(API_DOMAIN + '/v2/assets')
     if res.status_code == 404:
         return 404
     if res.status_code != 200:
@@ -75,7 +75,7 @@ def get_assets(*symbols: str, **simple: bool) -> dict | int:
     if symbols == ():
         symbols = [""]
     for symbol in symbols:
-        res = __APCA_request(API_DOMAIN + '/v2/assets/' + str(symbol))
+        res = __APCA_get(API_DOMAIN + '/v2/assets/' + str(symbol))
         if res.status_code == 404:
             return 404
         if res.status_code != 200:
