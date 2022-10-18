@@ -5,3 +5,11 @@ __pycache__/
 *$py.class
 **/symbols_list
 symbols_list
+/ken_api
+/tbc_ken_api.egg-info
+/dist
+/Generate.cmd
+/setup.py
+/build
+/lib workspace/ken_api
+/lib workspace
