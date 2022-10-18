@@ -11,5 +11,7 @@ symbols_list
 /Generate.cmd
 /setup.py
 /build
-/lib workspace/ken_api
-/lib workspace
+/lib workspace/ken_api/build
+/lib workspace/ken_api/dist
+/lib workspace/ken_api/tbc_ken_api.egg-info
+/lib workspace/ken_api/Generate.cmd
