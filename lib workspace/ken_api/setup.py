@@ -3,7 +3,7 @@ import os
 long_description = open(os.path.dirname(__file__)+'/src/README.MD').read()
 
 setup(name="tbc_ken_api",
-      version='0.3',
+      version='0.3.1',
       description="Trading Bot Club alpaca api",
       author="Kris Luangpenthong",
       author_email="krisken4699@gmail.com",
