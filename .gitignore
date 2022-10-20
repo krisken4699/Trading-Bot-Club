@@ -15,3 +15,5 @@ symbols_list
 /lib workspace/ken_api/dist
 /lib workspace/ken_api/tbc_ken_api.egg-info
 /lib workspace/ken_api/Generate.cmd
+/.vscode
+/.vscode/settings.json

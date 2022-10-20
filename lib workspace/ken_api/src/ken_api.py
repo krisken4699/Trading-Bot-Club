@@ -1,11 +1,9 @@
 import datetime
 import requests
-# import json
-from typing import Union
 import os
 
 dir_path = os.getcwd()
-print(dir_path)
+# print(dir_path)
 # with open(dir_path + '/alpaca_credentials.json') as credentials:
 #     data = json.load(credentials)
 #     APCA_API_KEY_ID = data["APCA-API-KEY-ID"]
@@ -22,7 +20,7 @@ class api:
     \t:params str APCA_API_SECRET_KEY: Your api secret for Alpaca.  
     """
 
-    def __init__(self, APCA_API_KEY_ID: str='PKNOZUSMT0A6E89QURCG', APCA_API_SECRET_KEY: str="SXFTc5gC4cAWmUpuGEiEurBGfN4bAqhA6Mxu28Ez"):
+    def __init__(self, APCA_API_KEY_ID: str = 'PKNOZUSMT0A6E89QURCG', APCA_API_SECRET_KEY: str = "SXFTc5gC4cAWmUpuGEiEurBGfN4bAqhA6Mxu28Ez"):
         self.API_DOMAIN = "https://paper-api.alpaca.markets"
         self.DATA_DOMAIN = "https://data.alpaca.markets"
         self.APCA_API_KEY_ID, self.APCA_API_SECRET_KEY = APCA_API_KEY_ID, APCA_API_SECRET_KEY
@@ -44,7 +42,7 @@ class api:
         except ValueError:
             raise ValueError("Incorrect data format, should be YYYY-MM-DD")
 
-    def download_symbols(self, path: str = "./") -> Union[dict, int]:
+    def download_symbols(self, path: str = "./") -> dict | int:
         """
         downloads a all symbols to ./symbols_list in the same directory, symbols_list.\n
         \t:param str path: Path to the download, default directory is module directory.
@@ -74,7 +72,7 @@ class api:
             outfile.write(symbol_list)
         return symbol_list
 
-    def get_assets(self, *symbols: str, **simple: bool) -> Union[dict, int]:
+    def get_assets(self, *symbols: str, **simple: bool) -> dict | int:
         """    
         Returns a simple dict including symbol, name, class, id, and status\n
         \t:args str symbols: symbols to request for assets\n
@@ -110,7 +108,7 @@ class api:
 
         return symbol_list
 
-    def get_bars(self, symbol, **kwargs) -> Union[list, int]:
+    def get_bars(self, symbol, **kwargs) -> list | int:
         """
         \t:param str symbol: Symbol of asset\n
         \t:param str start: starting date YYYY-MM-DD (optional)\n
@@ -150,3 +148,26 @@ class api:
             return res["bars"]
         else:
             return 404
+
+    def get_positions(self, symbol: str = "") -> list | int:
+        """
+        Returns owned assets' info or a specific asset's info.
+        \tparams str symbol: specific symbol of an asset you want to get the position.
+        """
+        positions = self.__APCA_get__("api", f"/v2/positions{ symbol }")
+        if positions.status_code == 404:
+            return 404
+        if positions.status_code != 200:
+            return positions.status_code
+        return positions.json()
+
+    def get_account(self) -> dict | int:
+        """
+        Return account information
+        """
+        account = self.__APCA_get__("api", f"/v2/account")
+        if account.status_code == 404:
+            return 404
+        if account.status_code != 200:
+            return account.status_code
+        return account.json()
