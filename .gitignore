@@ -17,3 +17,4 @@ symbols_list
 /lib workspace/ken_api/Generate.cmd
 /.vscode
 /.vscode/settings.json
+/backtester/TSLA_History.csv

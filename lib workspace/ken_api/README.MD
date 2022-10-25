@@ -10,9 +10,6 @@ $ pip install tbc-ken-lib
 
 tbc-ken-lib has and will only have functions that will be used for the project. Other functions that other Alpaca API clients may include that will not be used by the club will not be included in this lib.
 
-- [get_assets: (*symbols: str, **simple: bool) -> (dict | int)](#get-assets)
-- [get_bars: (symbol: Any, **kwargs: Any) -> (list | int)](#get-bars)
-- [downl# tbc-ken-lib
 #### This lib is made for to be used by members of the TBC club made in 2022.
 
 ## Install
