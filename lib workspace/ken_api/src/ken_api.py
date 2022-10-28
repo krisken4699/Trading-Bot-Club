@@ -108,7 +108,7 @@ class api:
 
         return symbol_list
 
-    def get_bars(self, symbol, **kwargs) -> list | int:
+    def get_bars(self, symbol:str, **kwargs) -> list | int:
         """
         \t:param str symbol: Symbol of asset\n
         \t:param str start: starting date YYYY-MM-DD (optional)\n
