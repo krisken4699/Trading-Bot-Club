@@ -18,3 +18,4 @@ symbols_list
 /.vscode
 /.vscode/settings.json
 /backtester/TSLA_History.csv
+/backtester/datasets/*
