@@ -80,9 +80,9 @@ def show_graph(entry: dict, symbol: str):
                                  name=f"Entry {i} index: {points['index']}", line_shape='linear'))
     # fig.update_traces(hoverinfo='text+name')
     # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
-    fig.show(config={'displayModeBar': False})
+    # fig.show(config={'displayModeBar': False})
     # fig.write_html(f'./{symbol}_graph.html', config={'displayModeBar': False})
-    # print(of.plot(fig, include_plotlyjs=False, output_type='div'))
+    print(of.plot(fig, include_plotlyjs=False, output_type='div'))
 
 
 class hammer:
@@ -172,7 +172,7 @@ class hammer:
 
 def main():
     for symbol in symbol_list:
-        print(symbol)
+        # print(symbol)
         downloadCandles(symbol, "2015-12-01")
         hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
 
