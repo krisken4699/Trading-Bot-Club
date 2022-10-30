@@ -19,3 +19,14 @@ symbols_list
 /.vscode/settings.json
 /backtester/TSLA_History.csv
 /backtester/datasets/*
+/frontend/node_modules
+/frontend/public
+/backend/node_modules
+/finance/lib workspace/ken_api/build
+/finance/lib workspace/ken_api/dist
+/finance/lib workspace/ken_api/tbc_ken_api.egg-info
+/finance/backtester/datasets/*
+/webApp/backend/node_modules
+**node_modules
+/webApp/frontend/.cache
+/webApp/frontend/node_modules
