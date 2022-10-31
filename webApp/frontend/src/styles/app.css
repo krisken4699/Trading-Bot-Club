@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@font-face {
+  font-family: "Metric-Thin";
+  src: url("./Metric/Metric-Thin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Metric-Light";
+  src: url("./Metric/Metric-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Metric-Regular";
+  src: url("./Metric/Metric-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Metric-Medium";
+  src: url("./Metric/Metric-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Metric-SemiBold";
+  src: url("./Metric/Metric-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Metric-Black";
+  src: url("./Metric/Metric-Black.woff2") format("woff2");
+}
+html {
+  /* overflow-x: hidden; */
+  padding: 0;
+  width: 100vw;
+  scroll-behavior: smooth;
+  background-color: #f7f7f7;
+}
+
+.font-A1-Thin{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 100;
+}
+.font-A1-ExtraLight{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 200;
+}
+.font-A1-Light{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 300;
+}
+.font-A1-Regular{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 400;
+}
+.font-A1-Medium{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 500;
+}
+.font-A1-SemiBold{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 600;
+}
+.font-A1-Bold{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 700;
+}
+.font-A1-ExtraBold{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 800;
+}
+.font-A1-Black{
+  font-family: 'Gothic A1', sans-serif;
+  font-weight: 900;
+}
+
+p {
+  color: '#202020'
+}
+.a {
+  font-family: "Metric-Light";
+  font-size: 0.8em;
+  font-style: normal;
+  font-weight: 300;
+  line-height: 20px;
+  color: #1C1D1D;
+  letter-spacing: 0.4px;
+  text-align: left;
+}
+section {
+  height: 100vh
+}
+
+body::-webkit-scrollbar-button {
+  background-color: transparent;
+  border-radius: 8px;
+}
+
+body::-webkit-scrollbar {
+  width: 0px;
+  background-color: transparent;
+  /* display: none; */
+  /* width of the entire scrollbar */
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+  /* color of the tracking area */
+  border: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(200, 200, 200, 0.4);
+  /* color of the scroll thumb */
+  border-radius: 4px;
+  /* roundness of the scroll thumb */
+  border: 3px solid rgba(200, 200, 200, 0.4);
+  /* creates padding around scroll thumb */
+}
+
+button:focus {
+  outline: none;
+}
+
+* {
+  font-family: 'Gothic A1', sans-serif;
+  ;
+  outline: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  color: "#333";
+  user-drag: none;
+  text-decoration: none;
+  list-style-type: none;
+}
