@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 from multiprocessing.sharedctypes import Value
-from random import choice
+from random import choice, randint
 from statistics import mean
 import ken_api
 import numpy as np
@@ -11,7 +11,8 @@ import csv
 import pandas as pd
 api = ken_api.api()
 
-symbol_list = ["SQ","SHOP","NET","COIN","GTLB","HCP","DLO","ASAN","W","LAC","FTCH","MSTR","CVNA","AUR","STEM","PACB","RIOT","UUUU","AMPX","AMRS","BNGO","VLD","DOMO","AEHR","NOTV","SKLZ","BBBY","CORZ"]
+symbol_list = ["SQ", "SHOP", "NET", "COIN", "GTLB", "HCP", "DLO", "ASAN", "W", "LAC", "FTCH", "MSTR", "CVNA", "AUR",
+               "STEM", "PACB", "RIOT", "UUUU", "AMPX", "AMRS", "BNGO", "VLD", "DOMO", "AEHR", "NOTV", "SKLZ", "BBBY", "CORZ"]
 
 
 def downloadCandles(symbol: str, start: str, end: str = None):
@@ -29,8 +30,6 @@ def downloadCandles(symbol: str, start: str, end: str = None):
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(to_csv)
-
-
 
 
 def show_graph(entry: dict, symbol: str):
@@ -75,14 +74,15 @@ def show_graph(entry: dict, symbol: str):
                                  y=[points["AY"], points["BY"]],
                                  #  xperiod="M1",
                                  #  xperiodalignment="middle",
-                                 line={'color': '#fff'},
+                                 line={
+                                     'color': '#fff' if points["Type"] == "Entry" else "#F00"},
                                  #  line={'color':choice(colors)},
                                  name=f"Entry {i} index: {points['index']}", line_shape='linear'))
     # fig.update_traces(hoverinfo='text+name')
     # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
-    # fig.show(config={'displayModeBar': False})
+    fig.show(config={'displayModeBar': False})
     # fig.write_html(f'./{symbol}_graph.html', config={'displayModeBar': False})
-    print(of.plot(fig, include_plotlyjs=False, output_type='div'))
+    # print(of.plot(fig, include_plotlyjs=False, output_type='div'))
 
 
 class hammer:
@@ -102,6 +102,7 @@ class hammer:
         self.df.length = self.df.shape[0]
         self.symbol = symbol
         self.entry = []
+        self.holding = False
 
     def openAttempt(self, index: int) -> None:  # check entry conditions
         # print(self.df.iloc[index-6:index-1])
@@ -111,7 +112,7 @@ class hammer:
         # if not(close-low >= 2 * abs(close-open) or open-low >= 2 * abs(close-open)):
         # if not(close-low >= 2 * abs(close-open) or open-low >= 2 * abs(close-open)):
         # these are the opening conditions
-        if not((open-low >= 2*(close-open) and close-open > 0) or (close-low >= 2*(open-close) and open-close > 0)):
+        if not ((open-low >= 2*(close-open) and close-open > 0) or (close-low >= 2*(open-close) and open-close > 0)):
             return False
         # print(open-low, 2*(close-open))
         # print(close-low, 2*(open-close))
@@ -130,7 +131,9 @@ class hammer:
         # print('Index:', index)
         # print(self.df.t[index-5:index].tolist())
         # print(f"{new *-6:.2f}", b)
+        self.holding = True
         return {
+            "Type": "Entry",
             "AX": (datetime.strptime(self.df.t[index - 6][0:10], '%Y-%m-%d')),
             "BX": (datetime.strptime(self.df.t[index - 1][0:10], '%Y-%m-%d')),
             # "AX": (datetime.strptime(self.df.t[0][0:10], '%Y-%m-%d') + timedelta(days=index-1)).strftime('%Y-%m-%d'),
@@ -141,6 +144,24 @@ class hammer:
             "BY": b + (new * (index-1)),
             "index": index
         }
+
+    def closeAttempt(self, index: int) -> None:  # check entry conditions
+        # print(self.df.iloc[index-6:index-1])
+
+        open = self.df.o[index]
+        close = self.df.c[index]
+        low = self.df.l[index]
+        entry_price = self.df.o[self.entry[len(self.entry)-1]["index"]]
+        if (self.df.o[index] - entry_price)/entry_price > 0.08:
+            self.holding = False
+            return {
+                "Type": "Exit",
+                "AX": (self.df.t[index]),
+                "BX": (self.df.t[index+1]),
+                "AY": (self.df.c[index]),
+                "BY": (self.df.o[index+1]),
+                "index": index
+            }
 
     def best_fit_line(self, ys: list, xs: list) -> tuple[float, float]:
         m = (len(xs) * sum(np.multiply(xs, ys)) - sum(xs)*sum(ys)) / ((len(xs) * sum(np.square(xs))) - pow(sum(xs), 2))  # nopep8
@@ -159,10 +180,14 @@ class hammer:
             # for index, row in self.df.iterrows():
             for index in range(6, len(self.df)):
                 # if index == 20:
-                attempt = self.openAttempt(index)
-                if attempt:
-                    self.entry.append(attempt)
-
+                if self.holding:
+                    attempt = self.closeAttempt(index)
+                    if attempt:
+                        self.entry.append(attempt)
+                else:
+                    attempt = self.openAttempt(index)
+                    if attempt:
+                        self.entry.append(attempt)
             # for x in self.entry:
             #     print(x)
             show_graph(self.entry, self.symbol)
@@ -171,9 +196,11 @@ class hammer:
 
 
 def main():
-    for symbol in symbol_list:
-        # print(symbol)
-        downloadCandles(symbol, "2015-12-01")
-        hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
+    # for symbol in symbol_list:
+    # print(symbol)
+    # downloadCandles(symbol, "2015-12-01")
+    # hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
+    hammer("SQ", f'./datasets/{"SQ"}_History.csv').backtest()
+
 
 main()
