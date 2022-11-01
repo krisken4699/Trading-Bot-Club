@@ -28,9 +28,10 @@ module.exports = {
       colors: {
         "black": '#0b0b0d',
         'primary':'#0b0b0d',
-        'secondary':'#aaaaaa',
-        'tertiary':'#181619',
-        'quaternary':'#181b22',
+        'secondary':'#F7F7F7',
+        'tertiary':'#ebeae8',
+        'quaternary':'#181619',
+        'quinary':'#181b22',
         'accent1':'#272a31',
         'accent2':'#a76b09',
         'accent3':'#dda74f',
