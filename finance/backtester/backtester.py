@@ -11,7 +11,8 @@ import csv
 import pandas as pd
 api = ken_api.api()
 
-symbol_list = ["SQ","SHOP","NET","COIN","GTLB","HCP","DLO","ASAN","W","LAC","FTCH","MSTR","CVNA","AUR","STEM","PACB","RIOT","UUUU","AMPX","AMRS","BNGO","VLD","DOMO","AEHR","NOTV","SKLZ","BBBY","CORZ"]
+symbol_list = ["SQ", "SHOP", "NET", "COIN", "GTLB", "HCP", "DLO", "ASAN", "W", "LAC", "FTCH", "MSTR", "CVNA", "AUR",
+               "STEM", "PACB", "RIOT", "UUUU", "AMPX", "AMRS", "BNGO", "VLD", "DOMO", "AEHR", "NOTV", "SKLZ", "BBBY", "CORZ"]
 
 
 def downloadCandles(symbol: str, start: str, end: str = None):
@@ -29,8 +30,6 @@ def downloadCandles(symbol: str, start: str, end: str = None):
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(to_csv)
-
-
 
 
 def show_graph(entry: dict, symbol: str):
@@ -69,20 +68,29 @@ def show_graph(entry: dict, symbol: str):
     fig.update_yaxes(
         gridcolor="#D4CCCC"
     )
-    for i in range(len(entry)):
-        points = entry[i]
-        fig.add_trace(go.Scatter(x=[points["AX"], points["BX"]],
-                                 y=[points["AY"], points["BY"]],
-                                 #  xperiod="M1",
-                                 #  xperiodalignment="middle",
-                                 line={'color': '#fff'},
-                                 #  line={'color':choice(colors)},
-                                 name=f"Entry {i} index: {points['index']}", line_shape='linear'))
+    for points in entry:
+        if points["type"] == "Entry":
+            fig.add_trace(go.Scatter(x=[points['CX']],
+                                     y=[points["CY"]],
+                                     line={'color': '#0ff'},
+                                     name=f"Entry: {points['index']}", line_shape='linear'))
+            fig.add_trace(go.Scatter(x=[points["AX"], points["BX"]],
+                                     y=[points["AY"], points["BY"]],
+                                     #  xperiod="M1",
+                                     #  xperiodalignment="middle",
+                                     line={'color': '#fff'},
+                                     #  line={'color':choice(colors)},
+                                     name=f"5 fit line {points['index']}", line_shape='linear'))
+        else:
+            fig.add_trace(go.Scatter(x=[points['AX']],
+                                     y=[points["AY"]],
+                                     line={'color': '#ff0' if points["reason"][0] else '#f90'},
+                                     name=f"Exit: {points['index']}\nROI:{points['ROI']:.2f} ", line_shape='linear'))
     # fig.update_traces(hoverinfo='text+name')
     # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
-    # fig.show(config={'displayModeBar': False})
+    fig.show(config={'displayModeBar': False})
     # fig.write_html(f'./{symbol}_graph.html', config={'displayModeBar': False})
-    print(of.plot(fig, include_plotlyjs=False, output_type='div'))
+    # print(of.plot(fig, include_plotlyjs=False, output_type='div'))
 
 
 class hammer:
@@ -96,51 +104,68 @@ class hammer:
         self.config = {
             "entry_trace": 5 if not "entry_trace" in config else config["entry_trace"],
             "line_break": 0.5 if not "line_break" in config else config["line_break"],
-
+            "stop_loss": -0.8 if not "stop_loss" in config else config["stop_loss"],
+            "profit_cap": 0.8 if not "profit_cap" in config else config["profit_cap"],
         }
         self.df = pd.read_csv(db_path)
         self.df.length = self.df.shape[0]
         self.symbol = symbol
+        self.holding = False
         self.entry = []
+        # print(self.config)
 
-    def openAttempt(self, index: int) -> None:  # check entry conditions
+    def openAttempt(self, index: int) -> bool:  # check entry conditions
         # print(self.df.iloc[index-6:index-1])
         open = self.df.o[index]
         close = self.df.c[index]
         low = self.df.l[index]
-        # if not(close-low >= 2 * abs(close-open) or open-low >= 2 * abs(close-open)):
-        # if not(close-low >= 2 * abs(close-open) or open-low >= 2 * abs(close-open)):
         # these are the opening conditions
         if not((open-low >= 2*(close-open) and close-open > 0) or (close-low >= 2*(open-close) and open-close > 0)):
             return False
-        # print(open-low, 2*(close-open))
-        # print(close-low, 2*(open-close))
         old, new, b = None, 0.0, 0.0
-        for i in range(4):  # repeat trace back 4 times from the first candle to count (index - 1)
+        # repeat trace back 4 times from the first candle to count (index - 1)
+        for i in range(self.config["entry_trace"]-1):
             new, b = self.best_fit_line(np.array(self.df.c[index-2-i:index].tolist(), dtype=np.float64), np.array(list(range(index-2-i, index)), dtype=np.float64))  # nopep8
-            # new, b = self.best_fit_line(np.array(self.df.c[index-3-i:index-1].tolist(), dtype=np.float64), np.array(list(range(index-2-i, index)), dtype=np.float64))  # nopep8
-            # new, b = self.best_fit_line(np.array(self.df.c[index-3-i:index-1].tolist(), dtype=np.float64), np.array(list(range(-2-i, 0)), dtype=np.float64))  # nopep8
-            if (old != None and old != 0) and (abs((new - old) / old) >= 0.5):
+            if (old != None and old != 0) and (abs((new - old) / old) >= self.config["line_break"]):
                 return False
             old = new
         if new >= 0:
             return False
-        # print(f"Best fit {i+1} = {new:.2f}x + {b:.2f}")
-        # print(b, new)
-        # print('Index:', index)
-        # print(self.df.t[index-5:index].tolist())
-        # print(f"{new *-6:.2f}", b)
+        self.holding = True
         return {
-            "AX": (datetime.strptime(self.df.t[index - 6][0:10], '%Y-%m-%d')),
-            "BX": (datetime.strptime(self.df.t[index - 1][0:10], '%Y-%m-%d')),
-            # "AX": (datetime.strptime(self.df.t[0][0:10], '%Y-%m-%d') + timedelta(days=index-1)).strftime('%Y-%m-%d'),
-            # "BX": (datetime.strptime(self.df.t[0][0:10], '%Y-%m-%d') + timedelta(days=index-6)).strftime('%Y-%m-%d'),
-            # "AY": b + (-new*index),
-            # "BY": b + (new * -6 * index),
-            "AY": b + (new * (index-6)),
+            "type": "Entry",
+            "AX": datetime.strptime(self.df.t[index - self.config["entry_trace"] - 1][0:10], '%Y-%m-%d'),
+            "BX": datetime.strptime(self.df.t[index - 1][0:10], '%Y-%m-%d'),
+            "CX": self.df.t[index],
+            "AY": b + (new * (index-self.config["entry_trace"] - 1)),
             "BY": b + (new * (index-1)),
+            "CY": self.df.o[index],
+            "price": self.df.o[index],
             "index": index
         }
+
+    def closeAttempt(self, index: int) -> bool:  # check entry conditions
+        # print(self.df.iloc[index-6:index-1])
+        open = self.df.o[index]
+        close = self.df.c[index]
+        high = self.df.h[index]
+        entry_price = self.entry[len(self.entry)-1]["price"]
+        ROI = (open - entry_price) / entry_price
+        conditions = [
+            ROI > self.config["profit_cap"] or ROI < self.config['stop_loss'],
+            (high-open >= 2*(open-close) and open-close > 0) or (high-close >= 2*(close-open) and close-open > 0)  # nopep8
+        ]
+        if any(conditions):
+            self.holding = False
+            return {
+                "type": "Exit",
+                "reason": conditions,
+                "ROI": ROI,
+                "price": self.df.o[index],
+                "AX": datetime.strptime(self.df.t[index][0:10], '%Y-%m-%d') + timedelta(days=1) if index + 1 == len(self.df) else self.df.t[index + 1][0:10],
+                "AY": self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index],
+                "index": index
+            }
 
     def best_fit_line(self, ys: list, xs: list) -> tuple[float, float]:
         m = (len(xs) * sum(np.multiply(xs, ys)) - sum(xs)*sum(ys)) / ((len(xs) * sum(np.square(xs))) - pow(sum(xs), 2))  # nopep8
@@ -154,26 +179,43 @@ class hammer:
         # this is offset
         return m, b
 
+    def get_ROI(self):
+        return 0 if self.entry == [] else sum(x["ROI"] for x in [x for x in self.entry if x["type"] == "Exit"])
+
     def backtest(self):
-        def main():  # main thread
-            # for index, row in self.df.iterrows():
-            for index in range(6, len(self.df)):
-                # if index == 20:
+        self.entry = []
+        # for index, row in self.df.iterrows():
+        for index in range(self.config["entry_trace"] + 1, len(self.df)):
+            # if index == 20:
+            if self.holding:
+                attempt = self.closeAttempt(index)
+                if attempt:
+                    self.entry.append(attempt)
+            else:
                 attempt = self.openAttempt(index)
                 if attempt:
                     self.entry.append(attempt)
-
-            # for x in self.entry:
-            #     print(x)
-            show_graph(self.entry, self.symbol)
-
-        main()
+        # for x in self.entry:
+        #     print(x)
+        show_graph(self.entry, self.symbol)
 
 
 def main():
+    symbol_roi = []
+    # for symbol in symbol_list:
+    # print(symbol)
+    # downloadCandles(symbol, "2015-12-01")
+    # hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
     for symbol in symbol_list:
-        # print(symbol)
         downloadCandles(symbol, "2015-12-01")
-        hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
+        temp = hammer(
+            symbol, f'./datasets/{symbol}_History.csv')
+        temp.backtest()
+        symbol_roi.append({"symbol": symbol, "ROI": temp.get_ROI()})
+    print(mean([x["ROI"] for x in symbol_roi]))
+    # for roi in symbol_roi:
+    #     if roi['ROI'] >= 1:
+    #         print(roi)
+
 
 main()
