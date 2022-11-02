@@ -6,13 +6,13 @@ import Burger from './Burger';
 import $ from 'jquery';
 import isActive from './isActive';
 import { useCookies } from 'react-cookie';
-import anime from 'animejs';
 import ContextProvider, { useTopContext } from "./ContextProvider";
 
 function Navbar() {
   const dropdownRef = useRef(null);
   const [cookies, setCookie, removeCookie] = useCookies(["user"]);
   const [shown, setShown] = useState(false);
+  const [dark, setDark] = useState(false);
   const top = useTopContext()
 
   const toggleDropdown = () => {
@@ -20,6 +20,13 @@ function Navbar() {
     $(".burger").toggleClass('not-active');
     $(".burger").toggleClass('active');
   };
+  useEffect(() => {
+    console.log()
+    if (window.location.href.replace("https://" + window.location.hostname, "").replace("http://" + window.location.hostname,"").replace(":8000", "") == '/') {
+      setDark(top)
+      // console.log(dark)
+    }
+  }, [top])
   useLayoutEffect(() => {
     if (!dropdownRef.current)
       return;
@@ -38,21 +45,21 @@ function Navbar() {
     })
   })
   return (
-    <Nav className={`z-50 fixed px-10 hover:opacity-100 opacity-0 ${top ? "bg-quinary" : "bg-tertiary"} border-b transition-all duration-500`}>
+    <Nav className={`z-50 fixed px-10 hover:opacity-100 opacity-0 ${dark ? "bg-quaternary" : "bg-tertiary"} border-b transition-all duration-500`}>
       <div>
         <div className="grid lg:px-36 grid-cols-3 grid-rows-1 gap-x-0 ">
           <div className={`nav-collapse hidden lg:col-start-1 text- grid-rows-1 col-span-1 lg:grid grid-cols-3 gap-0 content-center text-center`}>
-            <div className="a col-start-1 col-span-1 flex"><Link getProps={isActive} className={`self-center ${top ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/" href="#1">Home</Link></div>
-            <div className="a col-start-2 col-span-1 flex"><Link getProps={isActive} className={`self-center ${top ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/dashboard/" href="#2">Dashboard</Link></div>
-            <div className="a col-start-3 col-span-1 flex"><Link getProps={isActive} className={`self-center ${top ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/page-3/" href="#3">Page 3</Link></div>
+            <div className="a col-start-1 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/" href="#1">Home</Link></div>
+            <div className="a col-start-2 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/dashboard/" href="#2">Dashboard</Link></div>
+            <div className="a col-start-3 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/page-3/" href="#3">Page 3</Link></div>
           </div>
-          <div className='col-start2 col-span-1 flex items-center justify-center'>
-            <Link to='/' className={`link lg:hidden inline text-primary  dark:text-white !font-A1 text-md align-baseline ${top ? "text-accent3" : "text-primary"} font-semibold`}>TBC</Link>
-            <Link to='/' className={`link hidden lg:inline dark:text-white text-primary !font-A1 text-md align-baseline ${top ? "text-accent3" : "text-primary"} font-normal`}>Trading Bot Club</Link>
+          <div className='col-start2 col-span-1 flex items-center pl-[10%] justify-start lg:justify-center'>
+            <Link to='/' className={`link lg:hidden inline text-primary  dark:text-white !font-A1 text-md align-baseline ${dark ? "text-accent3" : "text-primary"} font-semibold`}>TBC</Link>
+            <Link to='/' className={`link hidden lg:inline dark:text-white text-primary !font-A1 text-md align-baseline ${dark ? "text-accent3" : "text-primary"} font-normal`}>Trading Bot Club</Link>
           </div>
           <div className="nav-collapse hidden lg:col-start-3 col-span-1 lg:grid grid-cols-1 gap-0 content-center text-center">
             <div className="col-start-3 flex">
-              <a className={`self-center text-center px-3 font-Metric-Medium tracking-1px text-[0.8em] ${top?"text-secondary":""}  leading-5 not-italic tracking-[0.4px] font-light cursor-pointer uppercase text-333 hover:text-A29F9A font-500`}>{cookies.user ? "Logout" : "Sign in"}</a>
+              <a className={`self-center text-center px-3 font-Metric-Medium tracking-1px text-[0.8em] ${dark ? "text-secondary" : ""}  leading-5 not-italic tracking-[0.4px] font-light cursor-pointer uppercase text-333 hover:text-A29F9A font-500`}>{cookies.user ? "Logout" : "Sign in"}</a>
               {/* <button className="focus:outline-none text-black bg-F9C74F focus:ring rounded-xl text-xs py-2 px-4 self-center Poppins mr-2">Sign in</button>
               <button className="focus:outline-none text-gray-450 border-gray-350 border focus:ring rounded-xl text-xs py-2 px-4 self-center Poppins">Sign in</button> */}
             </div>
@@ -75,10 +82,10 @@ function Navbar() {
           {/* rounded-md ring-1 shadow-lg ring-black ring-opacity-5 */}
           <div ref={dropdownRef} id="dropdown-menu" className="max-h-screen overflow-y-hidden lg:inline origin-top-right right-0 mt-0 w-56 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
             <div className="py-1" role="none">
-              <Link getProps={isActive} onClick={toggleDropdown} href="#1" className={`link ${top ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/">Home</Link>
-              <Link getProps={isActive} onClick={toggleDropdown} href="#2" className={`link ${top ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/dashboard/">Dashboard</Link>
-              <Link getProps={isActive} onClick={toggleDropdown} href="#3" className={`link ${top ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/page-3/  ">License</Link>
-              <a className={`cursor-pointer self-center text-center py-2 px-4 font-Metric-Medium tracking-1px text-xs uppercase text-333 ${top?"text-secondary":""} hover:text-A29F9A font-500`}>{cookies.user ? "Logout" : "Sign in"}</a>
+              <Link getProps={isActive} onClick={toggleDropdown} href="#1" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/">Home</Link>
+              <Link getProps={isActive} onClick={toggleDropdown} href="#2" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/dashboard/">Dashboard</Link>
+              <Link getProps={isActive} onClick={toggleDropdown} href="#3" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/page-3/  ">License</Link>
+              <a className={`cursor-pointer self-center text-center py-2 px-4 font-Metric-Medium tracking-1px text-xs uppercase text-333 ${dark ? "text-secondary" : ""} hover:text-A29F9A font-500`}>{cookies.user ? "Logout" : "Sign in"}</a>
             </div>
           </div>
 

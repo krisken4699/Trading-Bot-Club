@@ -14,7 +14,7 @@ module.exports = {
         'Metric-Medium': "Metric-Medium",
         'Metric-SemiBold': "Metric-SemiBold",
         'Metric-Black': "Metric-Black",
-        'A1':"Gothic A1"
+        'A1': "Gothic A1"
         // 'A1-Thin': "A1-Thin",
         // 'A1-ExtraLight': "A1-ExtraLight",
         // 'A1-Light': "A1-Light",
@@ -27,16 +27,16 @@ module.exports = {
       },
       colors: {
         "black": '#0b0b0d',
-        'primary':'#0b0b0d',
-        'secondary':'#F7F7F7',
-        'tertiary':'#ebeae8',
-        'quaternary':'#181619',
-        'quinary':'#181b22',
-        'accent1':'#272a31',
-        'accent2':'#a76b09',
-        'accent3':'#dda74f',
-        'gold1':'#a76b09',
-        'gold2':'#dda74f',
+        'primary': '#0b0b0d',
+        'secondary': '#F7F7F7',
+        'tertiary': '#ebeae8',
+        'quaternary': '#181619',
+        'quinary': '#181b22',
+        'accent1': '#272a31',
+        'accent2': '#a76b09',
+        'accent3': '#dda74f',
+        'gold1': '#a76b09',
+        'gold2': '#dda74f',
         'gray': {
           '450': '#858585',
           '350': '#ADADAD'

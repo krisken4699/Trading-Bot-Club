@@ -36,9 +36,20 @@
 html {
   /* overflow-x: hidden; */
   padding: 0;
+  scroll-snap-type: y proximity;
+  /* overflow-y: scroll; */
   width: 100vw;
   scroll-behavior: smooth;
   background-color: #f7f7f7;
+}
+
+.scroll-y{
+  scroll-snap-type: proximity;
+  overflow-y: scroll;
+}
+
+.snappy{
+  scroll-snap-align: center;
 }
 
 .font-A1-Thin{
@@ -92,7 +103,7 @@ p {
   text-align: left;
 }
 section {
-  height: 100vh
+  min-height: 100vh;
 }
 
 body::-webkit-scrollbar-button {

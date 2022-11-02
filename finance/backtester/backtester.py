@@ -4,6 +4,7 @@ from random import choice
 from statistics import mean
 import ken_api
 import numpy as np
+import json
 import plotly.offline as of
 import plotly.graph_objects as go
 # import plotly.express as px
@@ -70,12 +71,12 @@ def show_graph(entry: dict, symbol: str):
     )
     for points in entry:
         if points["type"] == "Entry":
-            fig.add_trace(go.Scatter(x=[points['CX']],
-                                     y=[points["CY"]],
+            fig.add_trace(go.Scatter(x=[points['AX']],
+                                     y=[points["AY"]],
                                      line={'color': '#0ff'},
                                      name=f"Entry: {points['index']}", line_shape='linear'))
-            fig.add_trace(go.Scatter(x=[points["AX"], points["BX"]],
-                                     y=[points["AY"], points["BY"]],
+            fig.add_trace(go.Scatter(x=[points["CX"], points["BX"]],
+                                     y=[points["CY"], points["BY"]],
                                      #  xperiod="M1",
                                      #  xperiodalignment="middle",
                                      line={'color': '#fff'},
@@ -84,7 +85,8 @@ def show_graph(entry: dict, symbol: str):
         else:
             fig.add_trace(go.Scatter(x=[points['AX']],
                                      y=[points["AY"]],
-                                     line={'color': '#ff0' if points["reason"][0] else '#f90'},
+                                     line={
+                                         'color': '#ff0' if points["reason"][0] else '#f90'},
                                      name=f"Exit: {points['index']}\nROI:{points['ROI']:.2f} ", line_shape='linear'))
     # fig.update_traces(hoverinfo='text+name')
     # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
@@ -134,13 +136,16 @@ class hammer:
         self.holding = True
         return {
             "type": "Entry",
-            "AX": datetime.strptime(self.df.t[index - self.config["entry_trace"] - 1][0:10], '%Y-%m-%d'),
-            "BX": datetime.strptime(self.df.t[index - 1][0:10], '%Y-%m-%d'),
-            "CX": self.df.t[index],
+            "Symbol": self.symbol,
+            "AX": self.df.t[index],
+            "BX": self.df.t[index - 1][0:10],
+            "CX": self.df.t[index - self.config["entry_trace"] - 1][0:10],
             "AY": b + (new * (index-self.config["entry_trace"] - 1)),
             "BY": b + (new * (index-1)),
             "CY": self.df.o[index],
+            "reason": 0,
             "price": self.df.o[index],
+            "ROI": 0,
             "index": index
         }
 
@@ -159,11 +164,16 @@ class hammer:
             self.holding = False
             return {
                 "type": "Exit",
-                "reason": conditions,
-                "ROI": ROI,
-                "price": self.df.o[index],
-                "AX": datetime.strptime(self.df.t[index][0:10], '%Y-%m-%d') + timedelta(days=1) if index + 1 == len(self.df) else self.df.t[index + 1][0:10],
+                "Symbol": self.symbol,
+                "AX": (datetime.strptime(self.df.t[index][0:10], '%Y-%m-%d') + timedelta(days=1) if index + 1 == len(self.df) else self.df.t[index + 1][0:10]),
+                "BX": 0,
+                "CX": 0,
                 "AY": self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index],
+                "BY": 0,
+                "CY": 0,
+                "reason": conditions,
+                "price": self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index],
+                "ROI": ROI,
                 "index": index
             }
 
@@ -179,11 +189,27 @@ class hammer:
         # this is offset
         return m, b
 
+    def get_logs(self):
+        return self.entry
+
     def get_ROI(self):
         return 0 if self.entry == [] else sum(x["ROI"] for x in [x for x in self.entry if x["type"] == "Exit"])
 
     def backtest(self):
-        self.entry = []
+        self.entry = [ {
+                "type": "Dummy",
+                "Symbol": "Dummy",
+                "AX": 0,
+                "BX": 0,
+                "CX": 0,
+                "AY": 0,
+                "BY": 0,
+                "CY": 0,
+                "reason": [],
+                "price": 0,
+                "ROI": 0,
+                "index": 0
+            }]
         # for index, row in self.df.iterrows():
         for index in range(self.config["entry_trace"] + 1, len(self.df)):
             # if index == 20:
@@ -197,25 +223,42 @@ class hammer:
                     self.entry.append(attempt)
         # for x in self.entry:
         #     print(x)
-        show_graph(self.entry, self.symbol)
+        # show_graph(self.entry, self.symbol)
 
 
 def main():
-    symbol_roi = []
     # for symbol in symbol_list:
     # print(symbol)
     # downloadCandles(symbol, "2015-12-01")
     # hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
+    today = None
+    # with open('./datasets/log.csv', 'w', newline="\n") as f:
+    #     f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
+    #     f.close()
+    open('./datasets/log.csv', 'w').truncate()
+
+    with open('./AppData.json') as f:
+        data = json.load(f)
+        today = data["date"] == datetime.now().strftime('%d/%m/%Y')
+    first = True
     for symbol in symbol_list:
-        downloadCandles(symbol, "2015-12-01")
+        if not today:  # nopep8
+            downloadCandles(symbol, "2015-12-01")
+            print("Downloaded", symbol)
         temp = hammer(
-            symbol, f'./datasets/{symbol}_History.csv')
+            symbol, f'./datasets/{symbol}_History.csv') 
         temp.backtest()
-        symbol_roi.append({"symbol": symbol, "ROI": temp.get_ROI()})
-    print(mean([x["ROI"] for x in symbol_roi]))
-    # for roi in symbol_roi:
-    #     if roi['ROI'] >= 1:
-    #         print(roi)
+        # temp.get_logs()
+        blob = pd.DataFrame(temp.get_logs()).drop(
+            columns=['BX', 'CX', 'AY', 'BY', 'CY'], axis=1)
+        # print(blob)
+        blob[blob["type"].str.contains("Dummy")==False].to_csv('./datasets/log.csv', mode="a", index=False, header=True if first else False)
+        first = False
+    with open("AppData.json", "w") as jsonfile:
+        json.dump({"date": datetime.now().strftime('%d/%m/%Y')}, jsonfile)
+
+    # print(mean([x["ROI"] for x in symbol_roi]))
 
 
-main()
+if __name__ == "__main__":
+    main()
