@@ -71,27 +71,55 @@ const IndexPage = () => {
         opacity: 1,
         duration: 0.5
       })
-      gsap.fromTo('.grit',{
-        backgroundColor:"#0b0b0d"
+
+      // const grid = gsap.timeline()
+      gsap.fromTo('.grit', {
+        backgroundColor: "#0b0b0d"
       }, {
         scrollTrigger: {
           trigger: "#grid",
           // markers: true,
-          // start: " top",
+          start: "top+=20% bottom",
           // delay: 1,
-          // end: "bottom top",
-          toggleActions: "restart pause restart pause"
+          scrub: true,
+          end: "bottom-=20% bottom",
+          // toggleActions: "restart reset restart reset"
         },
         stagger: {
-          axis: 'x',
+          axis: 'y',
           amount: 1,
-          from: "center",
+          from: "start",
           grid: [20, 20]
         },
-        backgroundColor:"#ebeae8",
+        backgroundColor: "#dda74f",
         scale: 0.5,
+        delay: 0.2,
         duration: 1,
       })
+
+
+      gsap.to('.grid  ', {
+        scrollTrigger: {
+          trigger: "#grid",
+          markers: true,
+          start: "bottom-=20% bottom",
+          // delay: 1,
+          // pin:true,4
+          scrub: true,
+          end: "bottom bottom",
+          // toggleActions: "restart reset restart reset"
+        },
+        stagger: {
+          axis: 'y',
+          amount: 1,
+          from: "start",
+          grid: [20, 20]
+        },
+        width: "1px",
+        // delay:,
+      })
+
+
       gsap.to('.logo', {
         scrollTrigger: {
           trigger: ".logo",
@@ -101,7 +129,7 @@ const IndexPage = () => {
           scrub: true,
           // toggleActions:"restart pause reverse pause"
         },
-        y: "25vh",
+        y: "40vh",
         x: "2vw",
         ease: Power0.easeNone
         // webkitFilter: "brightness(0.5)", 
@@ -117,7 +145,7 @@ const IndexPage = () => {
   const grids = []
 
   return (
-    <div ref={app} className={`overflow-x-hidden blur-none transition-colors duration-500 ${top? 'bg-primary' : ""}`} style={{margin: `0`, maxWidth: "100vw", padding: `0` }}>
+    <div ref={app} className={`overflow-x-hidden blur-none transition-colors duration-500 ${top ? 'bg-primary' : ""}`} style={{ margin: `0`, maxWidth: "100vw", padding: `0` }}>
       <section className="h-screen logo flex align-middle justify-center " >
         <div className="flex align-middle justify-center ">
           <div className={`flex align-middle justify-center z-0 absolute top-0 left-0 blur-[0px] w-screen min-h-screen bg-no-repeat bg-center transition-all bg-[length:65vw]`} style={{ backgroundImage: `url(${top ? Logo2 : Logo})`, }}>
@@ -148,8 +176,8 @@ const IndexPage = () => {
       </section>
       <section className="h-[20vh] w-screen">
       </section>
-      <section className=" w-screen bg-gradient-to-b from-primary to-quaternary">
-        <div id="grid" className="flex flex-wrap w-screen">
+      <section className=" w-screen ">
+        <div id="grid" className="flex flex-wrap w-screen -translate-y-10">
           {[...Array(400)].map((e, i) => (<div key={i} className="w-[5vw] h-[5vw] block grit bg-primary"></div>))}
         </div>
 
