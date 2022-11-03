@@ -3,13 +3,15 @@ import Logo from "../images/Logo2.png"
 import Logo2 from "../images/Logo4.png"
 import $ from 'jquery'
 import { useTopContext } from "../components/ContextProvider"
-import { gsap, Power0 } from 'gsap'
+import { gsap, Power1, random } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 const IndexPage = () => {
 
   const background = useRef(null)
   const app = useRef(null)
+  const gridElem = useRef(null)
+  const [gridHeight, setGridHeight] = useState(0)
   const top = useTopContext()
   gsap.registerPlugin(ScrollTrigger)
   useEffect(() => {
@@ -22,17 +24,23 @@ const IndexPage = () => {
     })
   }, []);
   useEffect(() => {
+    setGridHeight(gridElem.current.clientHeight)
+  }, [gridElem]);
+  useEffect(() => {
     // create our context. This function is invoked immediately and all GSAP animations and ScrollTriggers created during the execution of this function get recorded so we can revert() them later (cleanup)
     let ctx = gsap.context(() => {
-      gsap.fromTo('#h1', {
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#h1",
+          start: "top bottom",
+          end: 'bottom+=100 top',
+          // markers:true,
+          toggleActions: "restart reset restart reset"
+        },
+      }).fromTo('#h1', {
         y: '20px',
         opacity: 0
       }, {
-        scrollTrigger: {
-          trigger: "#h1",
-          // start: "top bottom",
-          toggleActions: "restart reset restart reset"
-        },
         y: "0",
         // delay: ,
         opacity: 1,
@@ -72,53 +80,101 @@ const IndexPage = () => {
         duration: 0.5
       })
 
-      // const grid = gsap.timeline()
-      gsap.fromTo('.grit', {
-        backgroundColor: "#0b0b0d"
-      }, {
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#h1",
+          // markers: true,
+          start: "top top",
+          endTrigger: "#grid",
+          end: "bottom bottom",
+          // markers: true,
+          start: "top top",
+          // delay: 1,
+          scrub: true,
+          // end: "bottom-=20% bottom",
+          // toggleActions: "restart reset restart reset"
+        },
+      })
+        .fromTo('.grit', {
+          scale: 2
+        }, {
+          stagger: {
+            axis: 'y',
+            amount: 1,
+            // ease: Power1.easeInOut(),
+            from: "start",
+            grid: [window.innerWidth > window.innerHeight ? 20 : 30, 20]
+          },
+          scale: 0.5,
+          // delay: 0.2,
+          duration: 1,
+        })
+
+      gsap.timeline({
         scrollTrigger: {
           trigger: "#grid",
           // markers: true,
-          start: "top+=20% bottom",
+          // start: "bottom-=100vh top",
+          start: "bottom bottom",
           // delay: 1,
-          scrub: true,
-          end: "bottom-=20% bottom",
-          // toggleActions: "restart reset restart reset"
+          // scrub: 2,
+          end: "bottom+=20% bottom",
+          toggleActions: "play resume none reverse"
         },
+      }).to('.grit2', {
         stagger: {
           axis: 'y',
-          amount: 1,
-          from: "start",
-          grid: [20, 20]
+          amount: 0.1,
+          // ease: Power1.easeInOut(),
+          from: "end",
+          grid: [window.innerWidth > window.innerHeight ? 20 : 30, 20]
         },
-        backgroundColor: "#dda74f",
-        scale: 0.5,
-        delay: 0.2,
-        duration: 1,
+        scale: 1,
+        width: '1px',
+        height: '*=2',
+        // border: '1px',
+        y: '100vh',
+        // marginRight: window.innerWidth > window.innerHeight ? "25w-=0.5px" : "10h-=0.5px",
+        // marginLeft: window.innerWidth > window.innerHeight ? "25w-=0.5px" : "10h-=0.5px",
+        // // delay: 0.2,
+        duration: 0.7,
       })
 
-
-      gsap.to('.grid  ', {
+      gsap.timeline({
         scrollTrigger: {
-          trigger: "#grid",
-          markers: true,
-          start: "bottom-=20% bottom",
-          // delay: 1,
-          // pin:true,4
-          scrub: true,
+          trigger: "#h1",
+          // markers: true,
+          start: "top top",
+          endTrigger: "#grid",
           end: "bottom bottom",
+          // delay: 1,
+          scrub: true,
+          // end: "bottom-=20% bottom",
           // toggleActions: "restart reset restart reset"
         },
-        stagger: {
-          axis: 'y',
-          amount: 1,
-          from: "start",
-          grid: [20, 20]
-        },
-        width: "1px",
-        // delay:,
+      }).fromTo('.grit2', {
+        backgroundColor: "#0b0b0d"
+      }, {
+        ease: "Power1.easeIn",
+        backgroundColor: "#dda74f",
+        // duration: 10
       })
 
+
+      gsap.to('#graph', {
+        scrollTrigger: {
+          trigger: "#graph",
+          start: "top top",
+          end: "bottom+=100% bottom",
+          markers: true,
+          scrub: true,
+          // toggleActions:"restart pause reverse pause"
+        },
+        display: "block",
+        ease: "Power1.easeIn",
+        y: "+=100vh",
+        // x: "2vw",
+      })
 
       gsap.to('.logo', {
         scrollTrigger: {
@@ -129,9 +185,10 @@ const IndexPage = () => {
           scrub: true,
           // toggleActions:"restart pause reverse pause"
         },
-        y: "40vh",
-        x: "2vw",
-        ease: Power0.easeNone
+        y: "60vh",
+        scale: 0.8,
+        // x: "2vw",
+        ease: Power1.easeOut
         // webkitFilter: "brightness(0.5)", 
         // filter: "brightness(0.5)"
       })
@@ -142,11 +199,14 @@ const IndexPage = () => {
 
   }, []);
 
+
+
   const grids = []
 
   return (
     <div ref={app} className={`overflow-x-hidden blur-none transition-colors duration-500 ${top ? 'bg-primary' : ""}`} style={{ margin: `0`, maxWidth: "100vw", padding: `0` }}>
-      <section className="h-screen logo flex align-middle justify-center " >
+      {/* <section className={` `}> */}
+      <section className={`h-screen logo flex align-middle justify-center`} >
         <div className="flex align-middle justify-center ">
           <div className={`flex align-middle justify-center z-0 absolute top-0 left-0 blur-[0px] w-screen min-h-screen bg-no-repeat bg-center transition-all bg-[length:65vw]`} style={{ backgroundImage: `url(${top ? Logo2 : Logo})`, }}>
             <img ref={background} src={Logo2} className={`z-10 object-contain blur-md w-[65vw]`} style={{ filter: `brightness(${top ? '200%' : '100%'}) ` }} alt="" />
@@ -154,35 +214,40 @@ const IndexPage = () => {
           <img ref={background} src={top ? Logo2 : Logo} className={`${top ? 'brightness-150 ' : "brightness-100"} z-10 object-contain ${top ? 'blur-md' : "blur-[8px]"} w-[65vw]`} alt="" />
         </div>
       </section>
+      {/* </section> */}
       <section className="h-[40vh] w-screen">
       </section>
       <section className="bg-transparent flex text-white py-20 xl:px-60 lg:px-40 px-10 md:px-20">
-        {/* <div style={{ perspective: "500px", perspectiveOrigin: "50% 50%" }} className="w-[100vw] left-0 top-[140vh] absolute h-[100vw]">
-          <div style={{ transform: "rotateX(64deg) rotateZ(327deg) rotateY(28deg) translateY(-100%) translateX(1000px)" }} className="h-[100vw] w-1/3 bg-quaternary"></div>
-        </div> */}
-
-        {/* <div className="z-20 flex justify-center align-middle">
-          <h1 className="text-8xl text-A1 font-bold text-center mb-10">Trading Bot Club</h1>
-          <p className="text-2xl font-Metric-Medium text-secondary mb-4">The Trading Bot Club is made in 2022-2023. We aim to make a functioning trading bot in a year with modest effeciency and ROI.</p>
-          <p className="text-2xl font-Metric-Medium text-secondary mb-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero placeat obcaecati perferendis dignissimos ratione eaque, impedit temporibus ea quasi alias repudiandae autem expedita facilis assumenda repellat, corporis facere animi possimus.</p>
-        </div> */}
         <div className="z-20 justify-center flex items-center align-middle">
-          <div >
-            <h1 id="h1" className="text-6xl sm:text-8xl text-A1 font-bold text-center mb-10">Trading Bot Club</h1>
-            <p id="p1" className=" sm:text-3xl text-lg sm:font-Metric-Regular font-Metric-Medium text-secondary mb-4">The Trading Bot Club is made in 2022-2023. We aim to make a functioning trading bot in a year with modest effeciency and ROI.</p>
-            <p id='p2' className="sm:text-3xl text-lg sm:font-Metric-Regular font-Metric-Medium text-secondary mb-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero placeat obcaecati perferendis dignissimos ratione eaque, impedit temporibus ea quasi alias repudiandae autem expedita facilis assumenda repellat, corporis facere animi possimus.</p>
+          <div className=" z-20">
+            <h1 id="h1" className="text-6xl sm:text-8xl relative text-A1 sm:font-thin font-bold text-center mb-10">Trading Bot Club</h1>
+            <p id="p1" className=" sm:text-3xl mix-blend-difference z-20 relative text-lg sm:font-Metric-Thin font-Metric-Medium text-secondary mb-4">The Trading Bot Club is made in 2022-2023. We aim to make a functioning trading bot in a year with modest effeciency and ROI.</p>
+            <p id='p2' className="sm:text-3xl mix-blend-difference relative z-20 text-lg sm:font-Metric-Thin font-Metric-Medium text-secondary mb-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero placeat obcaecati perferendis dignissimos ratione eaque, impedit temporibus ea quasi alias repudiandae autem expedita facilis assumenda repellat, corporis facere animi possimus.</p>
+            <div ref={gridElem} className="absolute z-10 translate-y-[40vh] left-0 w-screen ">
+              <div id="grid" className={`flex w-[100v${window.innerWidth > window.innerHeight ? "w" : "h"}] flex-wrap -translate-y-10`}>
+                {window.innerWidth > window.innerHeight ? [...Array(400)].map((e, i) => (<div key={i} className={`w-[5vw] h-[5vw] candle2 block grit overflow-y-visible`}><div className="grit2 z-10 w-full h-full mx-auto"></div></div>)) : [...Array(300)].map((e, i) => (<div key={i} className={`w-[10vw] h-[10vw] block grit overflow-y-visible`}><div className="grit2 mx-auto w-full h-full"></div></div>))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      <section className="h-[20vh] w-screen">
+      <section style={{ height: gridHeight }} className={`text-white w-screen`}>
       </section>
-      <section className=" w-screen ">
-        <div id="grid" className="flex flex-wrap w-screen -translate-y-10">
-          {[...Array(400)].map((e, i) => (<div key={i} className="w-[5vw] h-[5vw] block grit bg-primary"></div>))}
+      <section id="graph" className="text-white">
+        <div style={{width:`100v${window.innerWidth > window.innerHeight ? "w" : "h"}`}} className={`flex flex-wrap -translate-y-10`}>
+          {window.innerWidth > window.innerHeight ? [...Array(20)].map((e, i) => (
+             <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 50) + "vh"})` }} className={`w-[5vw] min-h-[5vw] candle overflow-y-visible flex items-center`}>
+              <div style={{ height: Math.round(Math.random() * 50) + "vh" }} className={`z-0 ${["bg-accent2", 'bg-accent3'][Math.round(Math.random())]} rounded-lg w-1/3 mx-auto`}></div>
+            </div>))
+            : [...Array(10)].map((e, i) => (
+              <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 50) + "vh"})` }} className={`w-[10vh] min-h-[10vh] candle overflow-visible flex items-center`}>
+                <div style={{ height: Math.round(Math.random() * 50) + "vh" }} className={`z-0 ${["bg-accent2", 'bg-accent3'][Math.round(Math.random())]} rounded-lg w-1/3 mx-auto`}></div>
+              </div>))}
         </div>
+      </section>
+      <section className={`h-10 text-white w-screen`}>
+      </section>
 
-        {/* </div> */}
-      </section >
     </div >
   )
 }
