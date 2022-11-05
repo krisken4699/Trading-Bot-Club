@@ -5,6 +5,8 @@ import $ from 'jquery'
 import { useTopContext } from "../components/ContextProvider"
 import { gsap, Power1, random } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { TimelineMax } from "gsap/gsap-core"
+import { TweenMax } from "gsap/gsap-core"
 
 const IndexPage = () => {
 
@@ -15,13 +17,14 @@ const IndexPage = () => {
   const top = useTopContext()
   gsap.registerPlugin(ScrollTrigger)
   useEffect(() => {
-    $(window).scroll(() => {
-      var scroll = $(window).scrollTop();
-      if (scroll > window.innerHeight * 0.3) {
-      }
-      else {
-      }
-    })
+    // $(window).scroll(() => {
+    // var scroll = $(window).scrollTop();
+    // if (scroll > window.innerHeight * 2 && scroll < window.innerHeight * 3) {
+
+    // }
+    // else if(scroll > window.innerHeight * 3) {
+    // }
+    // })
   }, []);
   useEffect(() => {
     setGridHeight(gridElem.current.clientHeight)
@@ -90,7 +93,7 @@ const IndexPage = () => {
           // markers: true,
           start: "top top",
           // delay: 1,
-          scrub: true,
+          scrub: 1,
           // end: "bottom-=20% bottom",
           // toggleActions: "restart reset restart reset"
         },
@@ -132,6 +135,8 @@ const IndexPage = () => {
         scale: 1,
         width: '1px',
         height: '*=2',
+        // filter:"drop-shadow(#dda74f 0 0 0.4rem)" ,
+        // boxShadow: "0 0 0.6rem 0.2rem rgba(221, 167,  79, 0.8)",
         // border: '1px',
         y: '100vh',
         // marginRight: window.innerWidth > window.innerHeight ? "25w-=0.5px" : "10h-=0.5px",
@@ -146,35 +151,112 @@ const IndexPage = () => {
           // markers: true,
           start: "top top",
           endTrigger: "#grid",
-          end: "bottom bottom",
+          end: "bottom-=30% bottom",
           // delay: 1,
           scrub: true,
           // end: "bottom-=20% bottom",
           // toggleActions: "restart reset restart reset"
         },
       }).fromTo('.grit2', {
-        backgroundColor: "#0b0b0d"
+        backgroundColor: "#100c0c"
       }, {
-        ease: "Power1.easeIn",
+        ease: "Power3.easeIn",
         backgroundColor: "#dda74f",
         // duration: 10
       })
 
 
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#grid",
+          start: "bottom-=50% top",
+          end: "bottom+=90% bottom",
+          // markers: true,
+          scrub: true,
+          // toggleActions:"restart pause reverse pause"
+        }
+      }).from('#graph', {
+
+        display: "block",
+        // opacity: 1,
+        y: "-=50vh",
+        // x: "2vw",
+      }).to("#graph", {
+        ease: "Power1.easeInOut",
+        y: "+=120vh",
+        clear:"all"
+      })
+
+      gsap.to("#h2",{
+        scrollTrigger: {
+          trigger: "#h2",
+          scrub:true,
+          start: "top top",
+          end: "+=100%",
+          markers: true,
+          // pin:true,
+          // toggleActions:"restart pause reverse pause"
+        },
+        y:'100vh',
+        ease:"none",
+        zIndex:0,
+        clearProps:"all"
+      })
+
       gsap.to('#graph', {
         scrollTrigger: {
-          trigger: "#graph",
-          start: "top top",
-          end: "bottom+=100% bottom",
-          markers: true,
+          trigger: "#grid",
+          end: "bottom+=200% bottom",
+          start: "bottom+=100% bottom",
+          // markers: true,
+          // scrub: true,
+          // pin: true,
+          // toggleActions:"restart pause reverse pause"
+        },
+      })
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#grid",
+          start: "bottom-=50%-=10px top",
+          end: "bottom+=50%-=10px bottom",
+          // markers: true,
           scrub: true,
           // toggleActions:"restart pause reverse pause"
         },
-        display: "block",
-        ease: "Power1.easeIn",
-        y: "+=100vh",
-        // x: "2vw",
       })
+        .from('.candle2, .tail', {
+          stagger: {
+            amount: 1,
+            from: 'random',
+            grid: 'auto',
+          },
+          css: {
+            backgroundColor: "#100c0c",
+          },
+        })
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: "#grid",
+          start: "bottom-=50%-=10px top",
+          end: "bottom+=50%-=10px bottom",
+          // markers: true,
+          scrub: true,
+          // toggleActions:"restart pause reverse pause"
+        }
+      }).to('.candle2', {
+        stagger: {
+          amount: 1,
+          from: 'random',
+          grid: 'auto',
+        },
+        // z:"-  100px",
+        filter: "drop-shadow(0 0 10px rgba(221,169,79,1))"
+      })
+      // .to('.candle2', {
+      //   css: { filter: "drop-shadow(#dda74f 0 0 0.3rem)" },
+      // }, "<")
+      // .fromTo('.candle2', { css: { backgroundColor: "#100c0c", filter: "drop-shadow(rgba(221,169,79,0) 0 0 0)" } }, { css: { filter: "drop-shadow(#dda74f 0 0 0.3rem)" } })
+
 
       gsap.to('.logo', {
         scrollTrigger: {
@@ -225,7 +307,13 @@ const IndexPage = () => {
             <p id='p2' className="sm:text-3xl mix-blend-difference relative z-20 text-lg sm:font-Metric-Thin font-Metric-Medium text-secondary mb-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Vero placeat obcaecati perferendis dignissimos ratione eaque, impedit temporibus ea quasi alias repudiandae autem expedita facilis assumenda repellat, corporis facere animi possimus.</p>
             <div ref={gridElem} className="absolute z-10 translate-y-[40vh] left-0 w-screen ">
               <div id="grid" className={`flex w-[100v${window.innerWidth > window.innerHeight ? "w" : "h"}] flex-wrap -translate-y-10`}>
-                {window.innerWidth > window.innerHeight ? [...Array(400)].map((e, i) => (<div key={i} className={`w-[5vw] h-[5vw] candle2 block grit overflow-y-visible`}><div className="grit2 z-10 w-full h-full mx-auto"></div></div>)) : [...Array(300)].map((e, i) => (<div key={i} className={`w-[10vw] h-[10vw] block grit overflow-y-visible`}><div className="grit2 mx-auto w-full h-full"></div></div>))}
+                {window.innerWidth > window.innerHeight ? [...Array(400)].map((e, i) => (
+                  <div key={i} className={`w-[5vw] h-[5vw] flex justify-center grit overflow-y-visible`}>
+                    <div className="grit2 z-10 w-full absolute h-full mx-auto"></div>
+                  </div>)) : [...Array(300)].map((e, i) => (
+                    <div key={i} className={`w-[10vw] h-[10vw] flex justify-center grit overflow-y-visible`}>
+                      <div className="grit2 z-10 mx-auto absolute w-full h-full"></div>
+                    </div>))}
               </div>
             </div>
           </div>
@@ -233,20 +321,29 @@ const IndexPage = () => {
       </section>
       <section style={{ height: gridHeight }} className={`text-white w-screen`}>
       </section>
-      <section id="graph" className="text-white">
-        <div style={{width:`100v${window.innerWidth > window.innerHeight ? "w" : "h"}`}} className={`flex flex-wrap -translate-y-10`}>
+      <section id="graph" className="text-white w-screen">
+        {/* <div style={{ width: `100v${window.innerWidth > window.innerHeight ? "w" : "h"}` }} className={`flex flex-wrap -translate-y-10`}> */}
+        <div className={` w-[100v${window.innerWidth > window.innerHeight ? "w" : "h"}] flex flex-wrap -translate-y-10`}>
           {window.innerWidth > window.innerHeight ? [...Array(20)].map((e, i) => (
-             <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 50) + "vh"})` }} className={`w-[5vw] min-h-[5vw] candle overflow-y-visible flex items-center`}>
-              <div style={{ height: Math.round(Math.random() * 50) + "vh" }} className={`z-0 ${["bg-accent2", 'bg-accent3'][Math.round(Math.random())]} rounded-lg w-1/3 mx-auto`}></div>
+            <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 40) + "vh"})` }} className={`w-[5vw] min-h-[5vw] candle overflow-y-visible relative flex justify-center items-center`}>
+              <div style={{ height: Math.round(Math.random() * 30 + 1) + "vh" }} className={`candle2 flex justify-center items-center ${["bg-[#dda74f]", 'bg-[#a76b09]'][Math.round(Math.random())]} relative w-1/3 mx-auto`}>
+                <div style={{ zIndex: -1, height: (Math.random() * 80 + 100) + "%" }} className="w-[2px] tail z-0 absolute mx-auto bg-secondary"></div>
+              </div>
             </div>))
             : [...Array(10)].map((e, i) => (
-              <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 50) + "vh"})` }} className={`w-[10vh] min-h-[10vh] candle overflow-visible flex items-center`}>
-                <div style={{ height: Math.round(Math.random() * 50) + "vh" }} className={`z-0 ${["bg-accent2", 'bg-accent3'][Math.round(Math.random())]} rounded-lg w-1/3 mx-auto`}></div>
+              <div key={i} style={{ transform: `translateY(${Math.round(Math.random() * 30) + "vh"})` }} className={`w-[10vw] min-h-[10vh] justify-center candle overflow-y-visible relative overflow-visible flex items-center`}>
+                <div style={{ height: Math.round(Math.random() * 18 + 1) + "vh" }} className={`flex justify-center items-center ${["bg-[#dda74f]", 'bg-[#a76b09]'][Math.round(Math.random())]} relative candle2 w-1/3 mx-auto`}>
+                  <div style={{ zIndex: -1, height: (Math.random() * 80 + 100) + "%" }} className="w-[2px] tail z-0 absolute mx-auto bg-secondary"></div>
+                </div>
               </div>))}
         </div>
       </section>
-      <section className={`h-10 text-white w-screen`}>
+      <section className={` text-white w-screen`}>
+        <div id="h2" className="h-screen bg-primary w-screen flex justify-center items-center">
+          <h1 className="text-[6rem] sm:text-[7rem] md:text-[10rem] lg:text-[14rem] xl:text-[16rem] 2xl:text-[17rem] z-10 mix-blend-difference tracking-tighter font-Metric-SemiBold font-extrabold">Be in <i>Ctrl</i></h1>
+        </div>
       </section>
+      <section className="h-[10vh]"></section>
 
     </div >
   )
