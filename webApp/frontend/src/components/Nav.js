@@ -14,17 +14,17 @@ function Navbar() {
   const [shown, setShown] = useState(false);
   const [dark, setDark] = useState(false);
   const top = useTopContext()
-
   const toggleDropdown = () => {
     setShown((prev) => !prev);
     $(".burger").toggleClass('not-active');
     $(".burger").toggleClass('active');
   };
   useEffect(() => {
-    console.log()
-    if (window.location.href.replace("https://" + window.location.hostname, "").replace("http://" + window.location.hostname,"").replace(":8000", "") == '/') {
+    if (window.location.href.replace("https://" + window.location.hostname, "").replace("http://" + window.location.hostname, "").replace(":8000", "") == '/OldIndex/') {
       setDark(top)
-      // console.log(dark)
+    }
+    else {
+      setDark(false)
     }
   }, [top])
   useLayoutEffect(() => {
@@ -51,7 +51,7 @@ function Navbar() {
           <div className={`nav-collapse hidden lg:col-start-1 text- grid-rows-1 col-span-1 lg:grid grid-cols-3 gap-0 content-center text-center`}>
             <div className="a col-start-1 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/" href="#1">Home</Link></div>
             <div className="a col-start-2 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/dashboard/" href="#2">Dashboard</Link></div>
-            <div className="a col-start-3 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/page-3/" href="#3">Page 3</Link></div>
+            <div className="a col-start-3 col-span-1 flex"><Link getProps={isActive} className={`self-center ${dark ? "text-secondary" : "text-primary"} text-center px-3 link`} to="/OldIndex/" href="#3">Old Landing</Link></div>
           </div>
           <div className='col-start2 col-span-1 flex items-center pl-[10%] justify-start lg:justify-center'>
             <Link to='/' className={`link lg:hidden inline text-primary  dark:text-white !font-A1 text-md align-baseline ${dark ? "text-accent3" : "text-primary"} font-semibold`}>TBC</Link>
@@ -84,7 +84,7 @@ function Navbar() {
             <div className="py-1" role="none">
               <Link getProps={isActive} onClick={toggleDropdown} href="#1" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/">Home</Link>
               <Link getProps={isActive} onClick={toggleDropdown} href="#2" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/dashboard/">Dashboard</Link>
-              <Link getProps={isActive} onClick={toggleDropdown} href="#3" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/page-3/  ">License</Link>
+              <Link getProps={isActive} onClick={toggleDropdown} href="#3" className={`link ${dark ? "text-secondary" : "text-primary"} block px-4 py-2`} role="menuitem" to="/OldIndex/">Old Landing</Link>
               <a className={`cursor-pointer self-center text-center py-2 px-4 font-Metric-Medium tracking-1px text-xs uppercase text-333 ${dark ? "text-secondary" : ""} hover:text-A29F9A font-500`}>{cookies.user ? "Logout" : "Sign in"}</a>
             </div>
           </div>

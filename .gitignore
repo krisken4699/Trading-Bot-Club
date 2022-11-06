@@ -30,3 +30,4 @@ symbols_list
 **node_modules
 /webApp/frontend/.cache
 /webApp/frontend/node_modules
+!finance/backtester/datasets/.gitkeep 

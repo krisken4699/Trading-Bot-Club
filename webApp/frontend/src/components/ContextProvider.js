@@ -1,8 +1,23 @@
 import React, { createContext, useState, useEffect, useContext } from 'react'
 import $ from 'jquery'
+import { globalHistory, useHistory } from '@reach/router'
 const TopContext = createContext()
-const ContextProvider = ({ children }) => {
+
+const ContextProvider = ({ location, children }) => {
     const [top, setTop] = useState(false);
+    useEffect(() => {
+        globalHistory.listen(() => {
+            var scroll = $(window).scrollTop();
+            if (scroll > window.innerHeight * 0.3) {
+                // setTop(false)
+                setTop(true)
+            }
+            else {
+                // setTop(true)
+                setTop(false)
+            }
+        })
+    });
     useEffect(() => {
         $(window).scroll(() => {
             var scroll = $(window).scrollTop();
@@ -12,7 +27,7 @@ const ContextProvider = ({ children }) => {
             else
                 setTop(false)
         })
-    })
+    });
     return (
         <TopContext.Provider value={top}>
             {children}
@@ -20,6 +35,6 @@ const ContextProvider = ({ children }) => {
     )
 }
 export default ContextProvider
-export function useTopContext(){
+export function useTopContext() {
     return useContext(TopContext)
 }

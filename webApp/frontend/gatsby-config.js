@@ -3,7 +3,7 @@ module.exports = {
     title: `Trading Bot Club`,
     siteUrl: `https://www.yourdomain.tld`
   },
-  plugins: ["gatsby-plugin-styled-components", 'gatsby-plugin-postcss', "gatsby-plugin-image", "gatsby-plugin-sitemap", {
+  plugins: ["gatsby-plugin-styled-components", 'gatsby-plugin-preact', 'gatsby-plugin-postcss', "gatsby-plugin-image", "gatsby-plugin-sitemap", {
     resolve: 'gatsby-plugin-manifest',
     options: {
       "icon": "src/images/logo.png"
