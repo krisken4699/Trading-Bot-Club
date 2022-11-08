@@ -1,5 +1,7 @@
 import gsap from "gsap"
+import gsap from "gsap"
 import React, { useState, useEffect, useRef } from "react"
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 const Dashboard = () => {
@@ -13,12 +15,27 @@ const Dashboard = () => {
                 start: 'top top',
                 end: "+=100%",
                 pin: '#test',
-                // markers: true
+                markers: true
             })
+            const main = useRef(null)
 
-            return () => ctx.revert(); // cleanup
-        }, main); // <- IMPORTANT! Scopes selector text
+            gsap.registerPlugin(ScrollTrigger)
+            useEffect(() => {
+                let ctx = gsap.context(() => {
+                    ScrollTrigger.create({
+                        trigger: "#test",
+                        start: 'top top',
+                        end: "+=100%",
+                        pin: '#test',
+                        // markers: true
+                    })
 
+                    return () => ctx.revert(); // cleanup
+                }, main); // <- IMPORTANT! Scopes selector text
+                return () => ctx.revert(); // cleanup
+            }, main); // <- IMPORTANT! Scopes selector text
+
+        }, []);
     }, []);
 
     return (
