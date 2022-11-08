@@ -13,7 +13,7 @@ const Dashboard = () => {
                 start: 'top top',
                 end: "+=100%",
                 pin: '#test',
-                markers: true
+                // markers: true
             })
 
             return () => ctx.revert(); // cleanup
