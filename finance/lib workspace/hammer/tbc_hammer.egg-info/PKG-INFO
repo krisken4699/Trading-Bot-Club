@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: tbc-hammer
+Version: 0.0.1
+Summary: Hammer indicator api 
+Home-page: https://pypi.org/project/tbc-hammer/
+Author: Kris Luangpenthong
+Author-email: krisken4699@gmail.com
+Requires-Python: >=3.10
