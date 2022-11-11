@@ -228,8 +228,8 @@ class hammer:
         # for x in self.entry:
         #     print(x)
         # if self.symbol == "":
-        print(self.symbol)
-        show_graph(self.entry, self.symbol)
+        # print(self.symbol)
+        # show_graph(self.entry, self.symbol)
 
 
 def main():
