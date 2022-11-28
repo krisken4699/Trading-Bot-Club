@@ -227,6 +227,7 @@ class hammer:
 
 
 def main():
+<<<<<<< Updated upstream
     # for symbol in symbol_list:
     # print(symbol)
     # downloadCandles(symbol, "2015-12-01")
@@ -236,6 +237,18 @@ def main():
     #     f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
     #     f.close()
     open('./datasets/log.csv', 'w').truncate()
+=======
+    for symbol in symbol_list:
+        print(symbol)
+        downloadCandles(symbol, "2015-12-01")
+        hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
+        today = None
+        symbol_ROI = []
+    with open('./datasets/log.csv', 'w', newline="\n") as f:
+        f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
+        f.close()
+    open(path+'/datasets/log.csv', 'w').truncate()
+>>>>>>> Stashed changes
 
     with open('./AppData.json') as f:
         data = json.load(f)
