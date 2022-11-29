@@ -9,11 +9,13 @@ import plotly.offline as of
 import plotly.graph_objects as go
 # import plotly.express as px
 import csv
+import os
 import pandas as pd
 api = ken_api.api()
 
 symbol_list = ["SQ", "SHOP", "NET", "COIN", "GTLB", "HCP", "DLO", "ASAN", "W", "LAC", "FTCH", "MSTR", "CVNA", "AUR",
                "STEM", "PACB", "RIOT", "UUUU", "AMPX", "AMRS", "BNGO", "VLD", "DOMO", "AEHR", "NOTV", "SKLZ", "BBBY", "CORZ"]
+path = os.path.dirname(os.path.realpath(__file__))
 
 
 def downloadCandles(symbol: str, start: str, end: str = None):
@@ -27,15 +29,15 @@ def downloadCandles(symbol: str, start: str, end: str = None):
     to_csv = (api.get_bars(symbol, start=start))
     # to_csv = client.get_bars("SQ", end="2022-10-25", start="2021-02-01")
     keys = to_csv[0].keys()
-    with open('datasets/' + symbol + '_History.csv', 'w', newline='') as output_file:
+    with open(f'{path}/datasets/' + symbol + '_History.csv', 'w', newline='') as output_file:
         dict_writer = csv.DictWriter(output_file, keys)
         dict_writer.writeheader()
         dict_writer.writerows(to_csv)
 
 
 def show_graph(entry: dict, symbol: str):
-    colors = ["#B4B4B3", '#C7C7C7', '#D4CCCC']
-    df = pd.read_csv(f'./datasets/{symbol}_History.csv')
+    # colors = ["#B4B4B3", '#C7C7C7', '#D4CCCC']
+    df = pd.read_csv(f'{path}/datasets/{symbol}_History.csv')
     fig = go.Figure(data=[go.Candlestick(x=df['t'],
                     name=f"{symbol} Candle",
                     open=df['o'],
@@ -70,24 +72,25 @@ def show_graph(entry: dict, symbol: str):
         gridcolor="#D4CCCC"
     )
     for points in entry:
-        if points["type"] == "Entry":
-            fig.add_trace(go.Scatter(x=[points['AX']],
-                                     y=[points["AY"]],
-                                     line={'color': '#0ff'},
-                                     name=f"Entry: {points['index']}", line_shape='linear'))
-            fig.add_trace(go.Scatter(x=[points["CX"], points["BX"]],
-                                     y=[points["CY"], points["BY"]],
-                                     #  xperiod="M1",
-                                     #  xperiodalignment="middle",
-                                     line={'color': '#fff'},
-                                     #  line={'color':choice(colors)},
-                                     name=f"5 fit line {points['index']}", line_shape='linear'))
-        else:
-            fig.add_trace(go.Scatter(x=[points['AX']],
-                                     y=[points["AY"]],
-                                     line={
-                                         'color': '#ff0' if points["reason"][0] else '#f90'},
-                                     name=f"Exit: {points['index']}\nROI:{points['ROI']:.2f} ", line_shape='linear'))
+        if not points["type"] == "Dummy":
+            if points["type"] == "Entry":
+                fig.add_trace(go.Scatter(x=[points['AX']],
+                                        y=[points["AY"]],
+                                        line={'color': '#0ff'},
+                                        name=f"Entry: {points['index']}", line_shape='linear'))
+                fig.add_trace(go.Scatter(x=[points["CX"], points["BX"]],
+                                        y=[points["CY"], points["BY"]],
+                                        #  xperiod="M1",
+                                        #  xperiodalignment="middle",
+                                        line={'color': '#fff'},
+                                        #  line={'color':choice(colors)},
+                                        name=f"5 fit line {points['index']}", line_shape='linear'))
+            else:
+                fig.add_trace(go.Scatter(x=[points['AX']],
+                                        y=[points["AY"]],
+                                        line={
+                                            'color': '#ff0' if points["reason"][0] else '#f90'},
+                                        name=f"Exit: {points['index']}\nROI:{points['ROI']:.2f} ", line_shape='linear'))
     # fig.update_traces(hoverinfo='text+name')
     # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
     fig.show(config={'displayModeBar': False})
@@ -105,9 +108,9 @@ class hammer:
     def __init__(self, symbol: str, db_path: str, config={}):
         self.config = {
             "entry_trace": 5 if not "entry_trace" in config else config["entry_trace"],
-            "line_break": 0.5 if not "line_break" in config else config["line_break"],
-            "stop_loss": -0.8 if not "stop_loss" in config else config["stop_loss"],
-            "profit_cap": 0.8 if not "profit_cap" in config else config["profit_cap"],
+            "line_break": 0.7 if not "line_break" in config else config["line_break"],
+            "stop_loss": -0.08 if not "stop_loss" in config else config["stop_loss"],
+            "profit_cap": 0.08 if not "profit_cap" in config else config["profit_cap"],
         }
         self.df = pd.read_csv(db_path)
         self.df.length = self.df.shape[0]
@@ -121,8 +124,9 @@ class hammer:
         open = self.df.o[index]
         close = self.df.c[index]
         low = self.df.l[index]
+        high = self.df.h[index]
         # these are the opening conditions
-        if not((open-low >= 2*(close-open) and close-open > 0) or (close-low >= 2*(open-close) and open-close > 0)):
+        if not((open-low >= 2*(close-open) and high-close <= close-open and close-open > 0) or ((close-low) >= 2*(open-close) and high-open <= open-close and open-close > 0)):
             return False
         old, new, b = None, 0.0, 0.0
         # repeat trace back 4 times from the first candle to count (index - 1)
@@ -134,16 +138,17 @@ class hammer:
         if new >= 0:
             return False
         self.holding = True
+        # print(new)
         return {
             "type": "Entry",
             "Symbol": self.symbol,
             "AX": self.df.t[index],
             "BX": self.df.t[index - 1][0:10],
             "CX": self.df.t[index - self.config["entry_trace"] - 1][0:10],
-            "AY": b + (new * (index-self.config["entry_trace"] - 1)),
+            "AY": self.df.o[index],
             "BY": b + (new * (index-1)),
-            "CY": self.df.o[index],
-            "reason": 0,
+            "CY": b + (new * (index-self.config["entry_trace"] - 1)),
+            "reason": [],
             "price": self.df.o[index],
             "ROI": 0,
             "index": index
@@ -155,10 +160,10 @@ class hammer:
         close = self.df.c[index]
         high = self.df.h[index]
         entry_price = self.entry[len(self.entry)-1]["price"]
-        ROI = (open - entry_price) / entry_price
+        ROI = (close - entry_price) / entry_price
         conditions = [
             ROI > self.config["profit_cap"] or ROI < self.config['stop_loss'],
-            (high-open >= 2*(open-close) and open-close > 0) or (high-close >= 2*(close-open) and close-open > 0)  # nopep8
+            # (high-open >= 2*(open-close) and open-close > 0) or (high-close >= 2*(close-open) and close-open > 0)  # nopep8
         ]
         if any(conditions):
             self.holding = False
@@ -196,20 +201,20 @@ class hammer:
         return 0 if self.entry == [] else sum(x["ROI"] for x in [x for x in self.entry if x["type"] == "Exit"])
 
     def backtest(self):
-        self.entry = [ {
-                "type": "Dummy",
-                "Symbol": "Dummy",
-                "AX": 0,
-                "BX": 0,
-                "CX": 0,
-                "AY": 0,
-                "BY": 0,
-                "CY": 0,
-                "reason": [],
-                "price": 0,
-                "ROI": 0,
-                "index": 0
-            }]
+        self.entry = [{
+            "type": "Dummy",
+            "Symbol": "Dummy",
+            "AX": 0,
+            "BX": 0,
+            "CX": 0,
+            "AY": 0,
+            "BY": 0,
+            "CY": 0,
+            "reason": [False, False],
+            "price": 0,
+            "ROI": 0,
+            "index": 0
+        }]
         # for index, row in self.df.iterrows():
         for index in range(self.config["entry_trace"] + 1, len(self.df)):
             # if index == 20:
@@ -223,34 +228,24 @@ class hammer:
                     self.entry.append(attempt)
         # for x in self.entry:
         #     print(x)
+        # if self.symbol == "":
+        # print(self.symbol)
         # show_graph(self.entry, self.symbol)
 
 
 def main():
-<<<<<<< Updated upstream
     # for symbol in symbol_list:
     # print(symbol)
     # downloadCandles(symbol, "2015-12-01")
     # hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
     today = None
+    # symbol_ROI = []
     # with open('./datasets/log.csv', 'w', newline="\n") as f:
     #     f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
     #     f.close()
-    open('./datasets/log.csv', 'w').truncate()
-=======
-    for symbol in symbol_list:
-        print(symbol)
-        downloadCandles(symbol, "2015-12-01")
-        hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
-        today = None
-        symbol_ROI = []
-    with open('./datasets/log.csv', 'w', newline="\n") as f:
-        f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
-        f.close()
     open(path+'/datasets/log.csv', 'w').truncate()
->>>>>>> Stashed changes
 
-    with open('./AppData.json') as f:
+    with open(path+'/AppData.json') as f:
         data = json.load(f)
         today = data["date"] == datetime.now().strftime('%d/%m/%Y')
     first = True
@@ -259,18 +254,18 @@ def main():
             downloadCandles(symbol, "2015-12-01")
             print("Downloaded", symbol)
         temp = hammer(
-            symbol, f'./datasets/{symbol}_History.csv') 
+            symbol, f'{path}/datasets/{symbol}_History.csv')
         temp.backtest()
+        # symbol_ROI.append(temp.get_ROI())
         # temp.get_logs()
         blob = pd.DataFrame(temp.get_logs()).drop(
             columns=['BX', 'CX', 'AY', 'BY', 'CY'], axis=1)
         # print(blob)
-        blob[blob["type"].str.contains("Dummy")==False].to_csv('./datasets/log.csv', mode="a", index=False, header=True if first else False)
+        blob[blob["type"].str.contains("Dummy") == False].to_csv(
+            f'{path}/datasets/log.csv', mode="a", index=False, header=True if first else False)
         first = False
     with open("AppData.json", "w") as jsonfile:
         json.dump({"date": datetime.now().strftime('%d/%m/%Y')}, jsonfile)
-
-    # print(mean([x["ROI"] for x in symbol_roi]))
 
 
 if __name__ == "__main__":
