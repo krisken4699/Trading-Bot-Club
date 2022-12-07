@@ -5,8 +5,8 @@ from datetime import timedelta
 from pytz import timezone
 tz = timezone('EST')
 
-api = tradeapi.REST('your key',
-                    'your secret',
+api = tradeapi.REST('PKTZ097QYE1DL2OO6VLD',
+                    'jog3v8GF7N1qS40rOQtTp6b7m1xLthPFgisBDppa',
                     'https://paper-api.alpaca.markets')
 
 import logging
@@ -14,7 +14,7 @@ logging.basicConfig(filename='./new_5min_ema.log', format='%(name)s - %(levelnam
 logging.warning('{} logging started'.format(datetime.datetime.now().strftime("%x %X")))
 
 def get_data_bars(symbols, rate, slow, fast):
-    data = api.get_barset(symbols, rate, limit=20).df
+    data = api.get_bars(symbols, rate, limit=20).df
     for x in symbols:
         data.loc[:, (x, 'fast_ema')] = data[x]['close'].rolling(window=fast).mean()
         data.loc[:, (x, 'slow_ema')] = data[x]['close'].rolling(window=slow).mean()
@@ -74,6 +74,8 @@ def run_checker(stocklist):
             print('Sleeping', round(time_to_open(datetime.datetime.now(tz))/60/60, 2), 'hours')
             time.sleep(time_to_open(datetime.datetime.now(tz)))
 
-stocks = ['AA','AAL','AAPL','AIG','AMAT','AMC','AMD','AMGN','AMZN','APA','BA','BABA','BAC','BBY','BIDU','BP','C','CAT','CMG',]
+stocks = ['TSLA', 'AMD', 'CCL', 'NVDA', 'F', 'PLTR', 'PYPL', 'SNAP', 'MDB', 'ABNB', 'BX', 'RIVN', 'NFLX', 'RBLX',
+          'MRVL', 'SNOW', 'AMAT', 'DDOG', 'MBLY', 'ENPH', 'TTD', 'CHWY', 'DASH', 'ZS', 'SE', 'KKR', 'ETSY', 'ZI',
+          'TECK']
 
 run_checker(stocks)
