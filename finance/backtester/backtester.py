@@ -178,7 +178,7 @@ class hammer:
                 "CY": 0,
                 "reason": conditions,
                 "price": self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index],
-                "ROI": ROI,
+                "ROI": ((self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index] - entry_price)/entry_price)-1,
                 "index": index
             }
 
@@ -228,9 +228,9 @@ class hammer:
                     self.entry.append(attempt)
         # for x in self.entry:
         #     print(x)
-        # if self.symbol == "":
+        if self.symbol == "W":
         # print(self.symbol)
-        # show_graph(self.entry, self.symbol)
+            show_graph(self.entry, self.symbol)
 
 
 def main():
