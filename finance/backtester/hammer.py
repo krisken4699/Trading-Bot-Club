@@ -13,89 +13,7 @@ import os
 import pandas as pd
 api = ken_api.api()
 
-symbol_list = ["SQ", "SHOP", "NET", "COIN", "GTLB", "HCP", "DLO", "ASAN", "W", "LAC", "FTCH", "MSTR", "CVNA", "AUR",
-               "STEM", "PACB", "RIOT", "UUUU", "AMPX", "AMRS", "BNGO", "VLD", "DOMO", "AEHR", "NOTV", "SKLZ", "BBBY", "CORZ"]
 path = os.path.dirname(os.path.realpath(__file__))
-
-
-def downloadCandles(symbol: str, start: str, end: str = None):
-    # print(symbol, start,end)
-    """
-        downloads a all candles to ./<Symbol>_history in the same directory.\n
-        \t:param str symbol: Symbol
-        \t:param str start: Start date of the history you want to retrieve.
-    """
-    # print(str(datetime.date.today()))
-    to_csv = (api.get_bars(symbol, start=start))
-    # to_csv = client.get_bars("SQ", end="2022-10-25", start="2021-02-01")
-    keys = to_csv[0].keys()
-    with open(f'{path}/datasets/' + symbol + '_History.csv', 'w', newline='') as output_file:
-        dict_writer = csv.DictWriter(output_file, keys)
-        dict_writer.writeheader()
-        dict_writer.writerows(to_csv)
-
-
-def show_graph(entry: dict, symbol: str):
-    # colors = ["#B4B4B3", '#C7C7C7', '#D4CCCC']
-    df = pd.read_csv(f'{path}/datasets/{symbol}_History.csv')
-    fig = go.Figure(data=[go.Candlestick(x=df['t'],
-                    name=f"{symbol} Candle",
-                    open=df['o'],
-                    high=df['h'],
-                    low=df['l'],
-                    close=df['c'])])
-    fig.update_layout(
-        title={
-            "text": f"{symbol} History",
-            "font": {
-                # "family": "Overpass",
-                "color": "#D4CCCC"
-            }
-        },
-        yaxis_title='USD ($)',
-        paper_bgcolor="#2a322e",
-        # margin={"l": 0, "r": 0, "t": 10, "b": 20},
-        plot_bgcolor="#202020",
-        font_color="#F7F7F7",
-        font_family="arial",
-        legend_title_font_color="green",
-        legend={
-            "bgcolor": '#979797',
-            "bordercolor": '#F7F7F7'
-        }
-    )
-    fig.update_xaxes(
-        gridcolor="#C7C7C7",
-        gridwidth=1
-    )
-    fig.update_yaxes(
-        gridcolor="#D4CCCC"
-    )
-    for points in entry:
-        if not points["type"] == "Dummy":
-            if points["type"] == "Entry":
-                fig.add_trace(go.Scatter(x=[points['AX']],
-                                        y=[points["AY"]],
-                                        line={'color': '#0ff'},
-                                        name=f"Entry: {points['index']}", line_shape='linear'))
-                fig.add_trace(go.Scatter(x=[points["CX"], points["BX"]],
-                                        y=[points["CY"], points["BY"]],
-                                        #  xperiod="M1",
-                                        #  xperiodalignment="middle",
-                                        line={'color': '#fff'},
-                                        #  line={'color':choice(colors)},
-                                        name=f"5 fit line {points['index']}", line_shape='linear'))
-            else:
-                fig.add_trace(go.Scatter(x=[points['AX']],
-                                        y=[points["AY"]],
-                                        line={
-                                            'color': '#ff0' if points["reason"][0] else '#f90'},
-                                        name=f"Exit: {points['index']}\nROI:{points['ROI']:.2f} ", line_shape='linear'))
-    # fig.update_traces(hoverinfo='text+name')
-    # fig.update_traces(hoverinfo='text+name', mode='lines+markers')
-    fig.show(config={'displayModeBar': False})
-    # fig.write_html(f'./{symbol}_graph.html', config={'displayModeBar': False})
-    # print(of.plot(fig, include_plotlyjs=False, output_type='div'))
 
 
 class hammer:
@@ -154,18 +72,29 @@ class hammer:
             "index": index
         }
 
-    def closeAttempt(self, index: int) -> bool:  # check entry conditions
+    # check entry conditions
+    def closeAttempt(self, index: int | str, entry_price: float = "") -> bool:
+        """
+        attempt an exit
+        \t:param str index: Index of today in dataframe or date in YYYY-MM-DD format\n
+        \t:param float index: Latest price of entry. (optional)\n
+        """
         # print(self.df.iloc[index-6:index-1])
+        if isinstance(index, str):
+            index = self.df.index[self.df['t'] ==
+                                  "2022-11-28T05:00:00Z"].tolist()[0]+2
         open = self.df.o[index]
         close = self.df.c[index]
         high = self.df.h[index]
-        entry_price = self.entry[len(self.entry)-1]["price"]
+        if entry_price == "":
+            entry_price = self.entry[len(self.entry)-1]["price"]
         ROI = (close - entry_price) / entry_price
         conditions = [
             ROI > self.config["profit_cap"] or ROI < self.config['stop_loss'],
             # (high-open >= 2*(open-close) and open-close > 0) or (high-close >= 2*(close-open) and close-open > 0)  # nopep8
         ]
         if any(conditions):
+            print(conditions)
             self.holding = False
             return {
                 "type": "Exit",
@@ -181,6 +110,7 @@ class hammer:
                 "ROI": ((self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index] - entry_price)/entry_price)-1,
                 "index": index
             }
+        return False
 
     def best_fit_line(self, ys: list, xs: list) -> tuple[float, float]:
         m = (len(xs) * sum(np.multiply(xs, ys)) - sum(xs)*sum(ys)) / ((len(xs) * sum(np.square(xs))) - pow(sum(xs), 2))  # nopep8
@@ -228,45 +158,3 @@ class hammer:
                     self.entry.append(attempt)
         # for x in self.entry:
         #     print(x)
-        if self.symbol == "W":
-        # print(self.symbol)
-            show_graph(self.entry, self.symbol)
-
-
-def main():
-    # for symbol in symbol_list:
-    # print(symbol)
-    # downloadCandles(symbol, "2015-12-01")
-    # hammer(symbol, f'./datasets/{symbol}_History.csv').backtest()
-    today = None
-    # symbol_ROI = []
-    # with open('./datasets/log.csv', 'w', newline="\n") as f:
-    #     f.write("Action,Symbol,AX,BX,CX,AY,BY,CY,reason,price,ROI,index")
-    #     f.close()
-    open(path+'/datasets/log.csv', 'w').truncate()
-
-    with open(path+'/AppData.json') as f:
-        data = json.load(f)
-        today = data["date"] == datetime.now().strftime('%d/%m/%Y')
-    first = True
-    for symbol in symbol_list:
-        if not today:  # nopep8
-            downloadCandles(symbol, "2015-12-01")
-            print("Downloaded", symbol)
-        temp = hammer(
-            symbol, f'{path}/datasets/{symbol}_History.csv')
-        temp.backtest()
-        # symbol_ROI.append(temp.get_ROI())
-        # temp.get_logs()
-        blob = pd.DataFrame(temp.get_logs()).drop(
-            columns=['BX', 'CX', 'AY', 'BY', 'CY'], axis=1)
-        # print(blob)
-        blob[blob["type"].str.contains("Dummy") == False].to_csv(
-            f'{path}/datasets/log.csv', mode="a", index=False, header=True if first else False)
-        first = False
-    with open("AppData.json", "w") as jsonfile:
-        json.dump({"date": datetime.now().strftime('%d/%m/%Y')}, jsonfile)
-
-
-if __name__ == "__main__":
-    main()

@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 
 setup(name="tbc_ken_api",
-      version='0.3.5',
+      version='0.3.7',
       description="Trading Bot Club alpaca api",
       author="Kris Luangpenthong",
       author_email="krisken4699@gmail.com",

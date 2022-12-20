@@ -33,6 +33,14 @@ class api:
             }
         return requests.get((API_DOMAIN if type == "api" else DATA_DOMAIN) + path, headers=headers)
 
+    def __APCA_post__(self, type: str, path: str, data, headers=None) -> dict:
+        if not headers:
+            headers = {
+                'APCA-API-KEY-ID': self.APCA_API_KEY_ID,
+                'APCA-API-SECRET-KEY': self.APCA_API_SECRET_KEY,
+            }
+        return requests.post((API_DOMAIN if type == "api" else DATA_DOMAIN) + path, json=data, headers=headers)
+
     def __str__(self):
         return str({"lib path": dir_path, "domains": [API_DOMAIN, DATA_DOMAIN], "APCA_API_KEY_ID": self.APCA_API_KEY_ID})
 
@@ -72,6 +80,27 @@ class api:
             outfile.write(symbol_list)
         return symbol_list
 
+    def place_order(self, symbol: str, qty: int, side: str) -> dict:
+        """
+        Places order to Alpaca.
+        \t:param str symbol: symbol to place an order for
+        \t:param int qty: numbers of shares to trade.
+        \t:param str side: buy or sell
+        """
+        res = self.__APCA_post__("api", '/v2/orders', {
+            "symbol": symbol,
+            "qty": str(qty),
+            "side": side,
+            "type": 'market',
+            "time_in_force": "gtc"
+        })
+        if res.status_code == 404:
+            return 404
+        if res.status_code != 200:
+            return res.status_code
+        res = res.json()
+        return res
+
     def get_assets(self, *symbols: str, **simple: bool) -> dict | int:
         """    
         Returns a simple dict including symbol, name, class, id, and status\n
@@ -108,7 +137,7 @@ class api:
 
         return symbol_list
 
-    def get_bars(self, symbol:str, **kwargs) -> list | int:
+    def get_bars(self, symbol: str, **kwargs) -> list | int:
         """
         \t:param str symbol: Symbol of asset\n
         \t:param str start: starting date YYYY-MM-DD (optional)\n
@@ -154,7 +183,7 @@ class api:
         Returns owned assets' info or a specific asset's info.
         \tparams str symbol: specific symbol of an asset you want to get the position.
         """
-        positions = self.__APCA_get__("api", f"/v2/positions{ symbol }")
+        positions = self.__APCA_get__("api", f"/v2/positions/{symbol}")
         if positions.status_code == 404:
             return 404
         if positions.status_code != 200:
@@ -171,3 +200,7 @@ class api:
         if account.status_code != 200:
             return account.status_code
         return account.json()
+
+
+# if __name__ == "__main__":
+    # print(api().place_order('TSLA', 1, "buy"))
