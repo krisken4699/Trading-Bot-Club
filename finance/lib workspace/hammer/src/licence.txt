@@ -1,0 +1,4 @@
+This module is Open Source and there are no restrictions to this module.
+Feel free to use it or improve it.
+
+Created by Kris Luangpenthong (Ken)

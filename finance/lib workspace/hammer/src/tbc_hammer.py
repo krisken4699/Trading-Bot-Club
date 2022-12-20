@@ -108,7 +108,7 @@ class hammer:
     def __init__(self, symbol: str, db_path: str, config={}):
         self.config = {
             "entry_trace": 5 if not "entry_trace" in config else config["entry_trace"],
-            "line_break": 0.7 if not "line_break" in config else config["line_break"],
+            "line_break": 0.5 if not "line_break" in config else config["line_break"],
             "stop_loss": -0.08 if not "stop_loss" in config else config["stop_loss"],
             "profit_cap": 0.08 if not "profit_cap" in config else config["profit_cap"],
         }
@@ -124,9 +124,8 @@ class hammer:
         open = self.df.o[index]
         close = self.df.c[index]
         low = self.df.l[index]
-        high = self.df.h[index]
         # these are the opening conditions
-        if not((open-low >= 2*(close-open) and high-close <= close-open and close-open > 0) or ((close-low) >= 2*(open-close) and high-open <= open-close and open-close > 0)):
+        if not((open-low >= 2*(close-open) and close-open > 0) or (close-low >= 2*(open-close) and open-close > 0)):
             return False
         old, new, b = None, 0.0, 0.0
         # repeat trace back 4 times from the first candle to count (index - 1)
@@ -160,7 +159,7 @@ class hammer:
         close = self.df.c[index]
         high = self.df.h[index]
         entry_price = self.entry[len(self.entry)-1]["price"]
-        ROI = (close - entry_price) / entry_price
+        ROI = (open - entry_price) / entry_price
         conditions = [
             ROI > self.config["profit_cap"] or ROI < self.config['stop_loss'],
             # (high-open >= 2*(open-close) and open-close > 0) or (high-close >= 2*(close-open) and close-open > 0)  # nopep8
@@ -178,7 +177,7 @@ class hammer:
                 "CY": 0,
                 "reason": conditions,
                 "price": self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index],
-                "ROI": ((self.df.o[index + 1] if not index + 1 == len(self.df) else self.df.o[index] - entry_price)/entry_price)-1,
+                "ROI": ROI,
                 "index": index
             }
 
