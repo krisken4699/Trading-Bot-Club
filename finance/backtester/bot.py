@@ -54,7 +54,10 @@ def main():
                 attempt_result = temp.closeAttempt(datetime.now().strftime(
                     '%Y-%m-%d'), float(res["avg_entry_price"]))
                 if attempt_result != False:
-                    print(api.place_order(symbol, 1, "sell"))
+                    try:
+                        print(api.place_order(symbol, res['qty'], "sell"))
+                    except:
+                        print("Failed to place order. Maybe an order already exists. Needs manuel check.")
             else:
                 print(f"Symbol: {symbol}\tQuantity: 0")
 
