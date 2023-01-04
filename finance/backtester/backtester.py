@@ -13,8 +13,10 @@ import os
 import pandas as pd
 api = ken_api.api()
 
-symbol_list = ["SQ", "SHOP", "NET", "COIN", "GTLB", "HCP", "DLO", "ASAN", "W", "LAC", "FTCH", "MSTR", "CVNA", "AUR",
-               "STEM", "PACB", "RIOT", "UUUU", "AMPX", "AMRS", "BNGO", "VLD", "DOMO", "AEHR", "NOTV", "SKLZ", "BBBY", "CORZ"]
+symbol_list = ['TSLA', 'AMD', 'CCL', 'NVDA', 'F', 'PLTR', 'PYPL', 'SNAP', 'MDB', 'ABNB', 'BX', 'RIVN', 'NFLX', 'RBLX',
+          'MRVL', 'SNOW', 'AMAT', 'DDOG', 'MBLY', 'ENPH', 'TTD', 'CHWY', 'DASH', 'ZS', 'SE', 'KKR', 'ETSY', 'ZI',
+          'TECK']
+
 path = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -198,7 +200,7 @@ class hammer:
         return self.entry
 
     def get_ROI(self):
-        return 0 if self.entry == [] else sum(x["ROI"] for x in [x for x in self.entry if x["type"] == "Exit"])
+        return 0 if self.entry == [] else np.mean(x["ROI"] for x in [x for x in self.entry if x["type"] == "Exit"])
 
     def backtest(self):
         self.entry = [{
@@ -228,12 +230,12 @@ class hammer:
                     self.entry.append(attempt)
         # for x in self.entry:
         #     print(x)
-        if self.symbol == "W":
+        # if self.symbol == "W":
         # print(self.symbol)
-            show_graph(self.entry, self.symbol)
+        #     show_graph(self.entry, self.symbol)
 
 
-def main():
+def main(stop_loss, profit_cap):
     # for symbol in symbol_list:
     # print(symbol)
     # downloadCandles(symbol, "2015-12-01")
@@ -248,25 +250,24 @@ def main():
     with open(path+'/AppData.json') as f:
         data = json.load(f)
         today = data["date"] == datetime.now().strftime('%d/%m/%Y')
-    first = True
+    # first = True
     for symbol in symbol_list:
         if not today:  # nopep8
             downloadCandles(symbol, "2015-12-01")
             print("Downloaded", symbol)
         temp = hammer(
-            symbol, f'{path}/datasets/{symbol}_History.csv')
+            symbol, f'{path}/datasets/{symbol}_History.csv',{"stop_loss": stop_loss}, {"profit_cap": profit_cap})
         temp.backtest()
         # symbol_ROI.append(temp.get_ROI())
         # temp.get_logs()
         blob = pd.DataFrame(temp.get_logs()).drop(
             columns=['BX', 'CX', 'AY', 'BY', 'CY'], axis=1)
         # print(blob)
-        blob[blob["type"].str.contains("Dummy") == False].to_csv(
-            f'{path}/datasets/log.csv', mode="a", index=False, header=True if first else False)
-        first = False
+        # blob[blob["type"].str.contains("Dummy") == False].to_csv(
+        #     f'{path}/datasets/log.csv', mode="a", index=False, header=True if first else False)
+        # first = False
     with open("AppData.json", "w") as jsonfile:
         json.dump({"date": datetime.now().strftime('%d/%m/%Y')}, jsonfile)
-
 
 if __name__ == "__main__":
     main()
