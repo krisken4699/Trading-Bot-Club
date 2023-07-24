@@ -1,8 +1,6 @@
 import ken_api
-api = ken_api.api(
-    'PKNOZUSMT0A6E89QURCG',  # alpaca api key
-    "SXFTc5gC4cAWmUpuGEiEurBGfN4bAqhA6Mxu28Ez"  # alpaca api secret
-)  # the alpaca api key and secret almost feels like user and password sometimes
+api = ken_api.api('PKNOZUSMT0A6E89QURCG',
+                  "SXFTc5gC4cAWmUpuGEiEurBGfN4bAqhA6Mxu28Ez")  # the alpaca api key and secret almost feels like user and password sometimes
 
 # If you don't have your own keys, you can use mine up there, though it is limitted to 200 api requests per minute.
 # It's best to get your own keys tho
